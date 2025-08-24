@@ -1,0 +1,56 @@
+# sales/forms.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django import forms
+from django.forms import inlineformset_factory, BaseInlineFormSet
+from .models import Quotation, QuotationDestination, QuotationLine
+
+class QuotationForm(forms.ModelForm):
+    class Meta:
+        model = Quotation
+        fields = ["date", "customer", "origin", "cargo_desc", "validity_date", "payment_terms", "notes"]
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "validity_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+		}
+		
+# ---- Destination must >= 1
+class _DestinationFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        active = [f for f in self.forms if not f.cleaned_data.get('DELETE', False)
+                  and any(f.cleaned_data.get(k) for k in ['destination','incoterms','transit_time_days','schedule','extra_notes'])]
+        if len(active) < 1:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Minimal harus ada 1 destination pada quotation ini.")
+
+DestinationFormSet = inlineformset_factory(
+    Quotation,
+    QuotationDestination,
+    formset=_DestinationFormSet,
+    fields=["destination","incoterms","transit_time_days","schedule","extra_notes"],
+    extra=2,
+    can_delete=True
+)
+
+# ---- Line per destination must >= 1
+class _LineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        active = 0
+        for f in self.forms:
+            if f.cleaned_data.get('DELETE', False):
+                continue
+            if any(f.cleaned_data.get(k) for k in ['charge_type','description','unit','qty','rate','currency']):
+                active += 1
+        if active < 1:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Minimal 1 line pada setiap destination.")
+
+LineFormSet = inlineformset_factory(
+    QuotationDestination,
+    QuotationLine,
+    formset=_LineFormSet,
+    fields=["charge_type","description","unit","qty","rate","currency"],
+    extra=3,
+    can_delete=True
+)

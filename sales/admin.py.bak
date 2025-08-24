@@ -1,0 +1,28 @@
+from django.contrib import admin
+from .models import Quotation, QuotationDestination, QuotationLine
+
+class QuotationDestinationInline(admin.TabularInline):
+    model = QuotationDestination
+    extra = 0
+
+@admin.register(Quotation)
+class QuotationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'number', 'date', 'customer', 'origin', 'validity_date')
+    search_fields = ('number', 'customer__name', 'origin')
+    inlines = [QuotationDestinationInline]
+
+class QuotationLineInline(admin.TabularInline):
+    model = QuotationLine
+    extra = 0
+
+@admin.register(QuotationDestination)
+class QuotationDestinationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'quotation', 'destination', 'incoterms', 'schedule')
+    search_fields = ('destination', 'quotation__number')
+    inlines = [QuotationLineInline]
+
+@admin.register(QuotationLine)
+class QuotationLineAdmin(admin.ModelAdmin):
+    list_display = ('id', 'destination', 'charge_type', 'description', 'qty', 'rate', 'currency', 'amount')
+    list_filter = ('charge_type', 'currency')
+    search_fields = ('description', 'destination__destination', 'destination__quotation__number')

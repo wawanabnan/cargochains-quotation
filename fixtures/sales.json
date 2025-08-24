@@ -1,0 +1,124 @@
+[
+  {
+    "model": "sales.quotation",
+    "pk": 1,
+    "fields": {
+      "number": "Q-2025-0012",
+      "date": "2025-08-22",
+      "customer": 1,
+      "origin": "Jakarta, ID (Tanjung Priok)",
+      "cargo_desc": "Copper Concentrate, 20 MT (LCL)",
+      "validity_date": "2025-09-05",
+      "payment_terms": "14 days after invoice",
+      "notes": "Rates subject to space & surcharges"
+    }
+  },
+  {
+    "model": "sales.quotationdestination",
+    "pk": 1,
+    "fields": {
+      "quotation": 1,
+      "destination": "Singapore",
+      "incoterms": "FOB",
+      "transit_time_days": "3\u20134 days",
+      "schedule": "weekly",
+      "extra_notes": ""
+    }
+  },
+  {
+    "model": "sales.quotationdestination",
+    "pk": 2,
+    "fields": {
+      "quotation": 1,
+      "destination": "Port Klang",
+      "incoterms": "FOB",
+      "transit_time_days": "2\u20133 days",
+      "schedule": "weekly",
+      "extra_notes": ""
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 1,
+    "fields": {
+      "destination": 1,
+      "charge_type": "FREIGHT",
+      "description": "Ocean Freight (LCL)",
+      "unit": "per W/M (CBM)",
+      "qty": "12.000",
+      "rate": "45.0000",
+      "currency": "USD",
+      "amount": "540.00"
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 2,
+    "fields": {
+      "destination": 1,
+      "charge_type": "ORIGIN",
+      "description": "Trucking JKT\u2013Port",
+      "unit": "per trip",
+      "qty": "1.000",
+      "rate": "2000000.0000",
+      "currency": "IDR",
+      "amount": "2000000.00"
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 3,
+    "fields": {
+      "destination": 1,
+      "charge_type": "DOC",
+      "description": "Documentation",
+      "unit": "per shipment",
+      "qty": "1.000",
+      "rate": "50.0000",
+      "currency": "USD",
+      "amount": "50.00"
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 4,
+    "fields": {
+      "destination": 2,
+      "charge_type": "FREIGHT",
+      "description": "Ocean Freight (LCL)",
+      "unit": "per W/M (CBM)",
+      "qty": "12.000",
+      "rate": "40.0000",
+      "currency": "USD",
+      "amount": "480.00"
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 5,
+    "fields": {
+      "destination": 2,
+      "charge_type": "ORIGIN",
+      "description": "Trucking JKT\u2013Port",
+      "unit": "per trip",
+      "qty": "1.000",
+      "rate": "2000000.0000",
+      "currency": "IDR",
+      "amount": "2000000.00"
+    }
+  },
+  {
+    "model": "sales.quotationline",
+    "pk": 6,
+    "fields": {
+      "destination": 2,
+      "charge_type": "DOC",
+      "description": "Documentation",
+      "unit": "per shipment",
+      "qty": "1.000",
+      "rate": "50.0000",
+      "currency": "USD",
+      "amount": "50.00"
+    }
+  }
+]

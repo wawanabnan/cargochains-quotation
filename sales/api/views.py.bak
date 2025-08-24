@@ -1,0 +1,8 @@
+from rest_framework import viewsets, permissions
+from sales.models import Quotation
+from .serializers import QuotationSerializer
+
+class QuotationViewSet(viewsets.ModelViewSet):
+    queryset = Quotation.objects.all().select_related("customer").prefetch_related("destinations__lines")
+    serializer_class = QuotationSerializer
+    permission_classes = [permissions.IsAuthenticated]

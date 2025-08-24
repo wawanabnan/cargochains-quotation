@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Quotation {{ quotation.number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- Header + actions -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Quotation {{ quotation.number }}</h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-primary" href="{% url 'sales:quotation_edit_destinations' quotation.pk %}">
+        Edit Destinations / Lines
+      </a>
+      <a class="btn btn-outline-secondary" href="{% url 'sales:quotation_list' %}">Back to list</a>
+    </div>
+  </div>
+
+  <!-- Quotation header card -->
+  <div class="card shadow-sm rounded-2xl mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title">Header</h3>
+      <span class="text-body-secondary">Date: {{ quotation.date }}</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="border p-3 rounded bg-body-tertiary">
+            <div class="fw-bold mb-2">Customer</div>
+            <div>{{ quotation.customer.name }}</div>
+            <div class="text-body-secondary small">{{ quotation.customer.email|default:"-" }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border p-3 rounded bg-body-tertiary">
+            <div class="fw-bold mb-2">Origin</div>
+            <div>{{ quotation.origin }}</div>
+            <div class="fw-bold mt-2">Validity</div>
+            <div>{{ quotation.validity_date|default:"-" }}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border p-3 rounded bg-body-tertiary">
+            <div class="fw-bold mb-2">Cargo</div>
+            <div>{{ quotation.cargo_desc|default:"-" }}</div>
+            <div class="fw-bold mt-2">Payment Terms</div>
+            <div>{{ quotation.payment_terms|default:"-" }}</div>
+          </div>
+        </div>
+      </div>
+      {% if quotation.notes %}
+        <hr class="my-3">
+        <div>
+          <div class="fw-bold">Global Notes</div>
+          <div class="text-pre-wrap">{{ quotation.notes }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Destinations loop -->
+  {% for dest in quotation.destinations.all %}
+    {% if not dest.lines.exists %}
+      <div class="alert alert-warning">
+        Destination <strong>{{ dest.destination }}</strong> belum punya line.
+        <a href="{% url 'sales:destination_edit_lines' dest.pk %}">Tambah sekarang</a>.
+      </div>
+    {% endif %}
+
+    <div class="card mb-4 border-0 shadow-sm">
+      <div class="card-header bg-body-secondary">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge text-bg-dark me-2">{{ forloop.counter }}</span>
+            <strong>{{ dest.destination }}</strong>
+          </div>
+          <div class="text-body-secondary small">
+            Incoterms: {{ dest.incoterms|default:"-" }} •
+            Transit: {{ dest.transit_time_days|default:"-" }} •
+            Schedule: {{ dest.schedule|default:"-" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width:60px;">No</th>
+                <th>Charge Type</th>
+                <th>Description</th>
+                <th>Unit</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Rate</th>
+                <th class="text-center">Curr</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for line in dest.lines.all %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><span class="badge text-bg-secondary">{{ line.charge_type }}</span></td>
+                <td>{{ line.description }}</td>
+                <td>{{ line.unit }}</td>
+                <td class="text-end">{{ line.qty|floatformat:3 }}</td>
+                <td class="text-end">{{ line.rate|floatformat:2 }}</td>
+                <td class="text-center">{{ line.currency }}</td>
+                <td class="text-end">{{ line.amount|floatformat:2 }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-body-secondary py-4">No lines</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Subtotal per-destination -->
+        <div class="p-3 pt-0">
+          <div class="fw-bold">Subtotal {{ dest.destination }} (per currency)</div>
+          <ul class="list-unstyled mb-0">
+            {% for row in dest.totals_by_currency %}
+              <li>{{ row.currency }}: <strong>{{ row.total|floatformat:2 }}</strong></li>
+            {% empty %}
+              <li class="text-body-secondary">No totals.</li>
+            {% endfor %}
+          </ul>
+
+          {% if dest.extra_notes %}
+            <div class="text-body-secondary mt-2"><em>{{ dest.extra_notes }}</em></div>
+          {% endif %}
+        </div>
+
+        <div class="px-3 pb-3">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'sales:destination_edit_lines' dest.pk %}">
+            Add/Edit Lines
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-secondary">No destinations yet.
+      <a href="{% url 'sales:quotation_edit_destinations' quotation.pk %}">Add destinations</a>.
+    </div>
+  {% endfor %}
+
+  <!-- Grand totals -->
+  <div class="border-top pt-3">
+    <div class="fw-bold mb-2">Grand Total (per currency)</div>
+    <ul class="list-unstyled mb-0">
+      {% for row in quotation.totals_by_currency %}
+        <li>{{ row.currency }}: <strong>{{ row.total|floatformat:2 }}</strong></li>
+      {% empty %}
+        <li class="text-body-secondary">No totals.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+[
+  {
+    "model": "partners.customer",
+    "pk": 1,
+    "fields": {
+      "name": "PT ABC Mining",
+      "email": "procurement@abcmining.co.id",
+      "phone": "021-555-1234",
+      "address": "Jl. Contoh No. 123, Jakarta"
+    }
+  }
+]

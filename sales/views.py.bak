@@ -1,0 +1,27 @@
+from django.views.generic import DetailView, ListView, CreateView
+from django.urls import reverse_lazy
+from django.shortcuts import render
+from sales.models import Quotation
+from .forms import QuotationForm, DestinationFormSet, LineFormSet
+ 
+
+
+class QuotationDetailView(DetailView):
+    model = Quotation
+    template_name = "sales/quotation_detail.html"
+    context_object_name = "quotation"
+
+class QuotationListView(ListView):
+    model = Quotation
+    template_name = "sales/quotation_list.html"
+    context_object_name = "quotations"
+    paginate_by = 20
+	
+class QuotationCreateView(CreateView):
+    model = Quotation
+    form_class = QuotationForm
+    template_name = "sales/quotation_form.html"
+
+    def form_valid(self, form):
+        q = form.save()  # number otomatis di models.save()
+        return redirect("sales:quotation_edit_destinations", pk=q.pk)

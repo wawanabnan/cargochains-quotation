@@ -1,0 +1,11 @@
+from django.urls import path
+from .views import QuotationListView, QuotationDetailView, QuotationCreateView
+
+app_name = "sales"
+
+urlpatterns = [
+    path("quotations/", QuotationListView.as_view(), name="quotation_list"),
+    path("quotations/<int:pk>/", QuotationDetailView.as_view(), name="quotation_detail"),
+    path("quotations/new/", QuotationCreateView.as_view(), name="quotation_create"),  # 👈 baru
+
+]

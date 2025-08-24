@@ -1,0 +1,11 @@
+# sales/utils.py
+from django.utils import timezone
+
+def next_quotation_number(model):
+    y = timezone.now().year
+    prefix = f"Q-{y}-"
+    last = model.objects.filter(number__startswith=prefix).order_by("-number").first()
+    if not last:
+        return f"{prefix}0001"
+    last_num = int(last.number.split("-")[-1])
+    return f"{prefix}{last_num+1:04d}"

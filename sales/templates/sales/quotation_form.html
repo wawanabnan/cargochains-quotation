@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}New Quotation{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card shadow-sm rounded-2xl">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title">Step 1/2 — Quotation Header</h3>
+      <a class="btn btn-outline-secondary" href="{% url 'sales:quotation_list' %}">Back</a>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            {{ form.date }}
+            {% for err in form.date.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Validity Date</label>
+            {{ form.validity_date }}
+            {% for err in form.validity_date.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Customer</label>
+            {{ form.customer }}
+            {% for err in form.customer.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Origin</label>
+            {{ form.origin }}
+            {% for err in form.origin.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Cargo Description</label>
+            {{ form.cargo_desc }}
+            {% for err in form.cargo_desc.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Payment Terms</label>
+            {{ form.payment_terms }}
+            {% for err in form.payment_terms.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Notes</label>
+            {{ form.notes }}
+            {% for err in form.notes.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mt-3">
+          {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="submit">Save & Continue to Destinations</button>
+          <a class="btn btn-outline-secondary" href="{% url 'sales:quotation_list' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

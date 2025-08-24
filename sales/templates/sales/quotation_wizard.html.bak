@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}New Quotation (Wizard){% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <form method="post" id="wizard-form" novalidate>
+    {% csrf_token %}
+
+    <!-- STEP 1: HEADER -->
+    <div class="card shadow-sm rounded-2xl mb-3 step" id="step-1">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Step 1/3 — Header</h3>
+        <a class="btn btn-outline-secondary" href="{% url 'sales:quotation_list' %}">Back</a>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            {{ header_form.date }}
+            {% for e in header_form.date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Validity Date</label>
+            {{ header_form.validity_date }}
+            {% for e in header_form.validity_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Customer</label>
+            {{ header_form.customer }}
+            {% for e in header_form.customer.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Origin</label>
+            {{ header_form.origin }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Cargo Description</label>
+            {{ header_form.cargo_desc }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Payment Terms</label>
+            {{ header_form.payment_terms }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Notes</label>
+            {{ header_form.notes }}
+          </div>
+        </div>
+
+        {% if header_form.non_field_errors %}
+        <div class="alert alert-danger mt-3">
+          {% for e in header_form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button class="btn btn-primary" type="button" onclick="goStep(2)">Next</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: DESTINATIONS -->
+    <div class="card shadow-sm rounded-2xl mb-3 step d-none" id="step-2">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Step 2/3 — Destinations</h3>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary" type="button" onclick="goStep(1)">Back</button>
+          <button class="btn btn-primary" type="button" onclick="goStep(3)">Next</button>
+        </div>
+      </div>
+      <div class="card-body">
+        {{ dest_formset.management_form }}
+        <div id="dest-rows" class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Destination</th><th>Incoterms</th><th>Transit</th><th>Schedule</th><th>Notes</th><th>Delete</th>
+              </tr>
+            </thead>
+            <tbody id="dest-tbody">
+              {% for f in dest_formset %}
+              <tr class="dest-row">
+                <td>{{ f.destination }}</td>
+                <td>{{ f.incoterms }}</td>
+                <td>{{ f.transit_time_days }}</td>
+                <td>{{ f.schedule }}</td>
+                <td>{{ f.extra_notes }}</td>
+                <td>{{ f.DELETE }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn-outline-primary" onclick="addDest()">+ Add Destination</button>
+
+        {% if dest_formset.non_form_errors %}
+        <div class="alert alert-danger mt-3">
+          {% for e in dest_formset.non_form_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button class="btn btn-primary" type="button" onclick="goStep(3)">Next</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: LINES (per destination) -->
+    <div class="card shadow-sm rounded-2xl step d-none" id="step-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Step 3/3 — Lines per Destination</h3>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary" type="button" onclick="goStep(2)">Back</button>
+          <!-- Save Final: submit form -->
+          <button class="btn btn-success" type="submit">Save Final</button>
+        </div>
+      </div>
+      <div class="card-body" id="lines-container">
+        {# Pada POST invalid, server akan kirim line_formsets #}
+        {% if line_formsets %}
+          {% for idx, fs in line_formsets %}
+          <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-bold">Destination #{{ forloop.counter }}</div>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="addLine('{{ fs.prefix }}')">+ Add Line</button>
+            </div>
+            {{ fs.management_form }}
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Charge</th><th>Description</th><th>Unit</th>
+                    <th class="text-end">Qty</th><th class="text-end">Rate</th>
+                    <th>Curr</th><th>Delete</th>
+                  </tr>
+                </thead>
+                <tbody id="{{ fs.prefix }}-tbody">
+                  {% for lf in fs %}
+                  <tr>
+                    <td>{{ lf.charge_type }}</td>
+                    <td>{{ lf.description }}</td>
+                    <td>{{ lf.unit }}</td>
+                    <td class="text-end">{{ lf.qty }}</td>
+                    <td class="text-end">{{ lf.rate }}</td>
+                    <td>{{ lf.currency }}</td>
+                    <td>{{ lf.DELETE }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+			{% if fs.non_form_errors %}
+			<div class="alert alert-danger">
+			  {% for e in fs.non_form_errors %}<div>{{ e }}</div>{% endfor %}
+			</div>
+			{% endif %}			
+		</div>
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-info">Setelah menambahkan destinasi di Step 2, klik Next untuk memunculkan form Lines per destination. Anda bisa menambah baris line per destination di sini sebelum Save Final.</div>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button class="btn btn-success" type="submit">Save Final</button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<!-- TEMPLATES untuk cloning (Dest & Line) -->
+<template id="dest-empty-row">
+  <tr class="dest-row">
+    <td><input type="text" name="__NAME__-destination" class="form-control"></td>
+    <td><input type="text" name="__NAME__-incoterms" class="form-control"></td>
+    <td><input type="text" name="__NAME__-transit_time_days" class="form-control"></td>
+    <td><input type="text" name="__NAME__-schedule" class="form-control"></td>
+    <td><input type="text" name="__NAME__-extra_notes" class="form-control"></td>
+    <td><input type="checkbox" name="__NAME__-DELETE" class="form-check-input"></td>
+  </tr>
+</template>
+
+<template id="line-empty-row">
+  <tr>
+    <td><select name="__PREFIX__-__IDX__-charge_type" class="form-select">
+      <option value="">---</option>
+      <option value="FREIGHT">FREIGHT</option>
+      <option value="ORIGIN">ORIGIN</option>
+      <option value="DEST">DEST</option>
+      <option value="DOC">DOC</option>
+      <option value="OTHER">OTHER</option>
+    </select></td>
+    <td><input name="__PREFIX__-__IDX__-description" class="form-control"></td>
+    <td><input name="__PREFIX__-__IDX__-unit" class="form-control"></td>
+    <td><input type="number" step="0.001" name="__PREFIX__-__IDX__-qty" class="form-control text-end" value="1"></td>
+    <td><input type="number" step="0.0001" name="__PREFIX__-__IDX__-rate" class="form-control text-end"></td>
+    <td><input name="__PREFIX__-__IDX__-currency" class="form-control" value="USD"></td>
+    <td><input type="checkbox" name="__PREFIX__-__IDX__-DELETE" class="form-check-input"></td>
+  </tr>
+</template>
+
+<script>
+  // step show/hide
+  function goStep(n){
+    document.querySelectorAll('.step').forEach(s=>s.classList.add('d-none'));
+    document.getElementById('step-'+n).classList.remove('d-none');
+    // Saat masuk step-3 pertama kali, generate blok line untuk setiap dest aktif
+    if(n===3){ ensureLineBlocks(); }
+  }
+
+  // DESTINATION dynamic
+  function addDest(){
+    const totalInput = document.querySelector('input[name="dest-TOTAL_FORMS"]');
+    let total = parseInt(totalInput.value || '0');
+    const nameBase = `dest-${total}`;
+    const tpl = document.getElementById('dest-empty-row').content.cloneNode(true);
+    // set nama-nama input
+    tpl.querySelectorAll('input').forEach(inp=>{
+      inp.name = inp.name.replace('__NAME__', nameBase);
+    });
+    document.getElementById('dest-tbody').appendChild(tpl);
+    totalInput.value = total + 1;
+  }
+
+  // LINES dynamic per destination
+  function ensureLineBlocks(){
+    const container = document.getElementById('lines-container');
+    // jika sudah ada blok (POST invalid), biarkan
+    if(container.querySelector('[id$="-tbody"]')) return;
+
+    const total = parseInt(document.querySelector('input[name="dest-TOTAL_FORMS"]').value || '0');
+    for(let i=0;i<total;i++){
+      // skip dest yang dihapus
+      const del = document.querySelector(`input[name="dest-${i}-DELETE"]`);
+      if(del && del.checked) continue;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'border rounded p-3 mb-3';
+      const prefix = `line-${i}`;
+
+      // header + tombol add
+      const head = document.createElement('div');
+      head.className = 'd-flex justify-content-between align-items-center mb-2';
+      head.innerHTML = `<div class="fw-bold">Destination #${i+1}</div>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addLine('${prefix}')">+ Add Line</button>`;
+      wrap.appendChild(head);
+
+      // management form (TOTAL_FORMS etc.)
+      wrap.insertAdjacentHTML('beforeend', `
+        <input type="hidden" name="${prefix}-TOTAL_FORMS" value="1">
+        <input type="hidden" name="${prefix}-INITIAL_FORMS" value="0">
+        <input type="hidden" name="${prefix}-MIN_NUM_FORMS" value="0">
+        <input type="hidden" name="${prefix}-MAX_NUM_FORMS" value="1000">
+      `);
+
+      // table
+      const table = document.createElement('div');
+      table.className = 'table-responsive';
+      table.innerHTML = `
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Charge</th><th>Description</th><th>Unit</th>
+              <th class="text-end">Qty</th><th class="text-end">Rate</th>
+              <th>Curr</th><th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="${prefix}-tbody"></tbody>
+        </table>`;
+      wrap.appendChild(table);
+      container.appendChild(wrap);
+
+      // tambahkan 1 baris awal
+      addLine(prefix);
+    }
+  }
+
+  function addLine(prefix){
+    const tbody = document.getElementById(`${prefix}-tbody`);
+    const totalInput = document.querySelector(`input[name="${prefix}-TOTAL_FORMS"]`);
+    let idx = parseInt(totalInput.value || '0');
+    const tpl = document.getElementById('line-empty-row').content.cloneNode(true);
+    tpl.querySelectorAll('[name]').forEach(el=>{
+      el.name = el.name.replace('__PREFIX__', prefix).replace('__IDX__', idx);
+    });
+    tbody.appendChild(tpl);
+    totalInput.value = idx + 1;
+  }
+</script>
+{% endblock %}
