@@ -42,6 +42,8 @@
             <div>{{ quotation.validity_date|default:"-" }}</div>
             <div class="fw-bold mt-2">Payment Terms</div>
             <div>{{ quotation.payment_terms|default:"-" }}</div>
+<div class="fw-bold mt-2">Currency</div>
+<div>{{ quotation.currency }}</div>
           </div>
         </div>
         <div class="col-md-4">
@@ -88,7 +90,7 @@
               <th>Unit</th>
               <th class="text-end">Qty</th>
               <th class="text-end">Rate</th>
-              <th class="text-center">Curr</th>
+              
               <th class="text-end">Amount</th>
             </tr>
           </thead>
@@ -96,12 +98,12 @@
             {% for line in cargo.charges.all %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td><span class="badge text-bg-secondary">{{ line.charge_type }}</span></td>
+              <td><span class="badge text-bg-secondary">{{ line.description }}</span></td>
               <td>{{ line.description }}</td>
               <td>{{ line.unit }}</td>
               <td class="text-end">{{ line.qty|floatformat:3 }}</td>
               <td class="text-end">{{ line.rate|floatformat:2 }}</td>
-              <td class="text-center">{{ line.currency }}</td>
+              
               <td class="text-end">{{ line.amount|floatformat:2 }}</td>
             </tr>
             {% empty %}
@@ -111,13 +113,9 @@
         </table>
       </div>
       <div class="p-3 pt-0">
-        <div class="fw-bold">Subtotal cargo (per currency)</div>
+        <div class="fw-bold">Subtotal cargo </div>
         <ul class="list-unstyled mb-0">
-          {% for row in cargo.totals_by_currency %}
-            <li>{{ row.currency }}: <strong>{{ row.total|floatformat:2 }}</strong></li>
-          {% empty %}
-            <li class="text-body-secondary">No totals.</li>
-          {% endfor %}
+         <strong>{{ cargo.total_amount|floatformat:2 }}</strong>
         </ul>
         {% if cargo.extra_notes %}
           <div class="text-body-secondary mt-2"><em>{{ cargo.extra_notes }}</em></div>
@@ -130,13 +128,9 @@
   {% endfor %}
 
   <div class="border-top pt-3">
-    <div class="fw-bold mb-2">Grand Total (per currency)</div>
+    <div class="fw-bold mb-2">Grand Total</div>
     <ul class="list-unstyled mb-0">
-      {% for row in quotation.totals_by_currency %}
-        <li>{{ row.currency }}: <strong>{{ row.total|floatformat:2 }}</strong></li>
-      {% empty %}
-        <li class="text-body-secondary">No totals.</li>
-      {% endfor %}
+		<strong>{{ quotation.total_amount|floatformat:2 }}</strong>
     </ul>
   </div>
 </div>

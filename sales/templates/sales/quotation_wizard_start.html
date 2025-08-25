@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}New Quotation — Start{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <h2 class="mb-3">Create Quotation — Step 0</h2>
+  <form method="post" class="card shadow-sm">
+    {% csrf_token %}
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <label class="form-label">Transport Mode</label>
+          <div class="list-group" id="mode-group">
+            <label class="list-group-item"><input type="radio" name="mode" value="SEA" class="form-check-input me-2"> Sea</label>
+            <label class="list-group-item"><input type="radio" name="mode" value="AIR" class="form-check-input me-2"> Air</label>
+            <label class="list-group-item"><input type="radio" name="mode" value="LAND" class="form-check-input me-2"> Land</label>
+            <label class="list-group-item"><input type="radio" name="mode" value="MULTI" class="form-check-input me-2" checked> Multi</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Service Type</label>
+          <select name="service_option" id="service_option" class="form-select">
+            <option value="">— (Not required for Multi)</option>
+          </select>
+          <div class="form-text">Sea: D2D/D2P/P2P · Air: A2A/D2A · Land: fixed 'TRUCKING'</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Multi Destination?</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="multi_destination" name="multi_destination" checked>
+            <label class="form-check-label" for="multi_destination">Yes (destination per cargo)</label>
+          </div>
+          <div class="form-text">Uncheck untuk single destination (destination akan di header Step 1)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <a href="{% url 'sales:quotation_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button class="btn btn-primary" type="submit">Continue</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const SERVICE_BY_MODE = {
+  'SEA': [
+    {v:'D2D', t:'Door → Door'},
+    {v:'D2P', t:'Door → Port'},
+    {v:'P2P', t:'Port → Port'}
+  ],
+  'AIR': [
+    {v:'A2A', t:'Airport → Airport'},
+    {v:'D2A', t:'Door → Airport'}
+  ],
+  'LAND': [ {v:'TRUCKING', t:'Trucking'} ],
+  'MULTI': []
+};
+
+function fillService(mode){
+  const sel = document.getElementById('service_option');
+  sel.innerHTML = '';
+  (SERVICE_BY_MODE[mode] || []).forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.t;
+    sel.appendChild(opt);
+  });
+  if(mode === 'MULTI'){
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = '— (Not required for Multi)';
+    sel.appendChild(opt);
+    sel.value = '';
+  }else if(mode === 'LAND'){
+    sel.value = 'TRUCKING';
+  }else{
+    if(sel.options.length) sel.selectedIndex = 0;
+  }
+}
+
+document.addEventListener('change', (e)=>{
+  if(e.target.name === 'mode'){
+    fillService(e.target.value);
+  }
+});
+document.addEventListener('DOMContentLoaded', ()=>{
+  fillService(document.querySelector('input[name="mode"]:checked').value);
+});
+</script>
+{% endblock %}

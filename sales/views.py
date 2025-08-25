@@ -19,6 +19,12 @@ class QuotationDetailView(DetailView):
 
 # Wizard 1-halaman: Header → Cargo(s) → Charges per Cargo (save once)
 def quotation_wizard(request):
+    # ## PRESET_FROM_START: baca pilihan dari Step 0 (querystring)
+    preset_mode = (request.GET.get('mode') or '').upper() or None
+    preset_service = (request.GET.get('service') or '').upper() or None
+    preset_multi = request.GET.get('multi')
+    if preset_multi is not None:
+        preset_multi = True if str(preset_multi) in ('1','true','True','on') else False
     if request.method == "POST":
         header_form = QuotationForm(request.POST)
         cargo_formset = CargoFormSet(request.POST, prefix="cargo")
@@ -167,3 +173,169 @@ class CargoUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse('sales:cargo_detail', args=[self.object.pk])
+
+
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from .models import Cargo, CargoCharge
+from .forms import ChargeFormSetFactory
+
+def cargo_charges_edit(request, cargo_id: int):
+    cargo = get_object_or_404(Cargo.objects.select_related('quotation'), pk=cargo_id)
+    CFSF = ChargeFormSetFactory()
+    if request.method == 'POST':
+        formset = CFSF(request.POST, instance=cargo, prefix='chg')
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, 'Charges updated.')
+            return redirect('sales:cargo_charges_edit', cargo_id=cargo.pk)
+    else:
+        formset = CFSF(instance=cargo, prefix='chg')
+    return render(request, 'sales/cargo_charges_edit.html', {
+        'cargo': cargo,
+        'quotation': cargo.quotation,
+        'formset': formset,
+    })
+
+from django.views.generic import UpdateView
+class ChargeUpdateView(UpdateView):
+    model = CargoCharge
+    fields = ['charge_type','description','unit','qty','rate','currency']
+    template_name = 'sales/cargo_charges_edit.html'
+    context_object_name = 'charge'
+    def get_success_url(self):
+        return self.request.GET.get('next') or self.object.cargo and self.object.cargo.get_absolute_url() or '/'  
+
+
+
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
+def quotation_wizard_start(request):
+    """Step 0: pilih transport mode, service type, multi-destination.
+    Hasilnya diteruskan via querystring ke /wizard/new/.
+    """
+    if request.method == "POST":
+        mode = request.POST.get("mode", "MULTI").upper()
+        multi = request.POST.get("multi_destination") in ("on","true","1","True")
+        # Land -> service fixed 'TRUCKING'; Multi -> service kosong
+        if mode == "LAND":
+            service = "TRUCKING"
+        else:
+            service = request.POST.get("service_option","").upper()
+
+        # Redirect ke wizard new dengan parameter
+        url = reverse("sales:quotation_wizard")
+        # multi sebagai 1/0
+        params = f"?mode={mode}&multi={'1' if multi else '0'}&service={service}"
+        return redirect(url + params)
+
+    return render(request, "sales/quotation_wizard_start.html", {})
+
+
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
+def quotation_wizard_v3_start(request):
+    """Step 0 (V3): Pilih mode, service, multi-destination. Hasilnya diteruskan via querystring ke /wizard/v3/"""
+    if request.method == "POST":
+        mode = (request.POST.get("mode") or "MULTI").upper()
+        multi = request.POST.get("multi_destination") in ("on","true","1","True")
+        if mode == "LAND":
+            service = "TRUCKING"
+        else:
+            service = (request.POST.get("service_option") or "").upper()
+
+        url = reverse("sales:quotation_wizard_v3")
+        params = f"?mode={mode}&multi={'1' if multi else '0'}&service={service}"
+        return redirect(url + params)
+    return render(request, "sales/quotation_wizard_v3_start.html", {})
+
+def quotation_wizard_v3(request):
+    """
+    Step 1 (V3): Header + Cargo.
+    - SELALU pasang CargoFormSet(instance=quotation) baik GET maupun POST
+    - Enforce single-destination: jika multi_destination=False, setiap cargo.destination = destination_header
+    """
+    # Import lokal agar tidak ganggu import order
+    from .forms import QuotationForm, CargoFormSet
+    from .models import Quotation
+
+    # Baca preset dari Step 0 (querystring)
+    preset_mode = (request.GET.get('mode') or '').upper() or None
+    preset_service = (request.GET.get('service') or '').upper() or None
+    preset_multi = request.GET.get('multi')
+    if preset_multi is not None:
+        preset_multi = True if str(preset_multi) in ('1','true','True','on') else False
+
+    if request.method == "POST":
+        ## LOCK_STEP1_FIELDS: override POST from Step 0 presets
+        preset_mode = (request.GET.get('mode') or '').upper() or None
+        preset_service = (request.GET.get('service') or '').upper() or None
+        preset_multi = request.GET.get('multi')
+        if preset_multi is not None:
+            preset_multi = True if str(preset_multi) in ('1','true','True','on') else False
+        _post = request.POST.copy()
+        if preset_mode:
+            _post['transport_mode'] = preset_mode
+        if preset_service is not None:
+            _post['service_option'] = preset_service
+        if preset_multi is not None:
+            _post['multi_destination'] = 'on' if preset_multi else ''
+        header_form = QuotationForm(_post)
+        # Buat instance quotation (unsaved) untuk dipasang ke formset
+        if header_form.is_valid():
+            quotation = header_form.save(commit=False)
+        else:
+            quotation = Quotation()  # fallback supaya formset tetap punya parent
+        cargo_formset = CargoFormSet(request.POST, prefix="cg", instance=quotation)
+
+        if header_form.is_valid() and cargo_formset.is_valid():
+            # Enforce single destination
+            is_multi = header_form.cleaned_data.get("multi_destination", True)
+            if not is_multi:
+                dest_origin = header_form.cleaned_data.get('origin_header')
+                dest_header = header_form.cleaned_data.get('destination_header')
+                dest_head = header_form.cleaned_data.get("destination_header")
+                for f in cargo_formset.forms:
+                    if getattr(f, "cleaned_data", None) and not f.cleaned_data.get("DELETE", False):
+                        f.instance.destination = dest_head
+
+            # Simpan header lalu lines
+            quotation.save()
+            cargo_formset.instance = quotation
+            cargo_formset.save()
+
+            from django.shortcuts import redirect
+            return redirect("sales:quotation_detail", pk=quotation.pk)
+
+        # Jika tidak valid, render kembali dengan error
+        return render(request, "sales/quotation_wizard_v3.html", {
+            "header_form": header_form,
+            "cargo_formset": cargo_formset,
+            "preset_mode": preset_mode,
+            "preset_service": preset_service,
+            "preset_multi": preset_multi,
+        })
+
+    else:
+        # GET: siapkan form header & formset dengan parent dummy (unsaved)
+        header_form = QuotationForm()
+        # Apply preset ke initial
+        if preset_mode:
+            header_form.fields.get("transport_mode").initial = preset_mode
+        if preset_service is not None and "service_option" in header_form.fields:
+            header_form.fields["service_option"].initial = preset_service
+        if preset_multi is not None and "multi_destination" in header_form.fields:
+            header_form.fields["multi_destination"].initial = preset_multi
+
+        quotation = Quotation()  # parent dummy untuk inline formset
+        cargo_formset = CargoFormSet(prefix="cg", instance=quotation)
+
+        return render(request, "sales/quotation_wizard_v3.html", {
+            "header_form": header_form,
+            "cargo_formset": cargo_formset,
+            "preset_mode": preset_mode,
+            "preset_service": preset_service,
+            "preset_multi": preset_multi,
+        })

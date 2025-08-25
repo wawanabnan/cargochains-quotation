@@ -3,6 +3,11 @@
 {% block content %}
 <div class="container-fluid">
   <form method="post" id="wizard-form" novalidate>
+{% if request.GET.mode %}<input type="hidden" name="transport_mode" value="{{ request.GET.mode }}">{% endif %}
+{% if request.GET.service %}<input type="hidden" name="service_option" value="{{ request.GET.service }}">{% endif %}
+{% if request.GET.multi %}<input type="hidden" name="multi_destination" value="{% if request.GET.multi in '1 true True on' %}on{% else %}{% endif %}">{% endif %}
+<input type="hidden" name="_preset_mode" value="1">
+
     {% csrf_token %}
 
     <!-- STEP 1: HEADER -->
@@ -32,6 +37,27 @@
           <div class="col-md-6">
             <label class="form-label">Notes</label>
             {{ header_form.notes }}
+
+<div class="row g-3">
+  <div class="col-md-3">
+    <label class="form-label">Transport Mode</label>
+    {{ header_form.transport_mode }}
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Service Option</label>
+    {{ header_form.service_option }}
+    <div class="form-text">Wajib jika mode ≠ MULTI.</div>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Multi Destination?</label><br>
+    {{ header_form.multi_destination }}
+  </div>
+  <div class="col-md-3" id="dest-header-wrap">
+    <label class="form-label">Destination (Header)</label>
+    {{ header_form.destination_header }}
+  </div>
+</div>
+
           </div>
         </div>
         {% if header_form.non_field_errors %}
@@ -74,7 +100,7 @@
                 <td class="text-end">{{ f.weight_kg }}</td>
                 <td class="text-end">{{ f.volume_cbm }}</td>
                 <td>{{ f.origin }}</td>
-                <td>{{ f.destination }}</td>
+                <td data-cargo-destination>{{ f.destination }}</td>
                 <td>{{ f.extra_notes }}</td>
                 <td>{{ f.DELETE }}</td>
               </tr>
@@ -263,3 +289,82 @@
   }
 </script>
 {% endblock %}
+
+<script>
+  // Service options per mode
+  const SERVICE_BY_MODE = {
+    'SEA': [
+      {v:'D2D', t:'Door → Door'},
+      {v:'D2P', t:'Door → Port'},
+      {v:'P2P', t:'Port → Port'}
+    ],
+    'AIR': [
+      {v:'A2A', t:'Airport → Airport'},
+      {v:'D2A', t:'Door → Airport'}
+    ],
+    'LAND': [
+      {v:'D2D', t:'Door → Door'},
+      {v:'H2H', t:'Hub → Hub'}
+    ],
+    'MULTI': []
+  };
+
+  function fillServiceOptions(mode){
+    const sel = document.getElementById('id_service_option');
+    if(!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '';
+    (SERVICE_BY_MODE[mode] || []).forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt.v; o.textContent = opt.t;
+      sel.appendChild(o);
+    });
+    if(mode === 'MULTI'){
+      const o = document.createElement('option');
+      o.value = ''; o.textContent = '— (Not required)';
+      sel.appendChild(o);
+      sel.value = '';
+    }else{
+      // pilih pertama jika kosong
+      if(!sel.value && sel.options.length) sel.selectedIndex = 0;
+    }
+  }
+
+  function applyWizardFlags(){
+    const modeSel = document.getElementById('id_transport_mode');
+    const multiChk = document.getElementById('id_multi_destination');
+    const destHeaderWrap = document.getElementById('dest-header-wrap');
+
+    const mode = modeSel ? modeSel.value : 'MULTI';
+    const multi = multiChk ? multiChk.checked : true;
+
+    // service options for selected mode
+    fillServiceOptions(mode);
+
+    // hide/show header destination
+    if(destHeaderWrap){
+      destHeaderWrap.style.display = multi ? 'none' : '';
+    }
+
+    // hide destination column & inputs in cargo table when single destination
+    const cargoDestCells = document.querySelectorAll('[data-cargo-destination]');
+    cargoDestCells.forEach(td => {
+      td.style.display = multi ? '' : 'none';
+      // if single → copy header destination into each hidden input
+      if(!multi){
+        const input = td.querySelector('input,select,textarea');
+        const hdr = document.getElementById('id_destination_header');
+        if(input && hdr){ input.value = hdr.value; }
+      }
+    });
+  }
+
+  document.addEventListener('change', function(e){
+    if(e.target.id === 'id_transport_mode' || e.target.id === 'id_multi_destination' || e.target.id === 'id_destination_header'){
+      applyWizardFlags();
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function(){
+    try { applyWizardFlags(); } catch(_){}
+  });
+</script>

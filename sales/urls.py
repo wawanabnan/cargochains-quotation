@@ -5,6 +5,11 @@ from . import views   # ⬅️ penting, supaya bisa pakai views.quotation_pdf
 app_name = "sales"
 
 urlpatterns = [
+    path('quotations/wizard/v3/start/', views.quotation_wizard_v3_start, name='quotation_wizard_v3_start'),
+    path('quotations/wizard/v3/', views.quotation_wizard_v3, name='quotation_wizard_v3'),
+    path('quotations/wizard/start/', views.quotation_wizard_start, name='quotation_wizard_start'),
+    path('cargos/<int:cargo_id>/charges/', views.cargo_charges_edit, name='cargo_charges_edit'),
+    path('charges/<int:pk>/edit/', views.ChargeUpdateView.as_view(), name='charge_edit'),
     path('cargos/<int:pk>/', views.CargoDetailView.as_view(), name='cargo_detail'),
     path('cargos/<int:pk>/edit/', views.CargoUpdateView.as_view(), name='cargo_edit'),
     path("", RedirectView.as_view(pattern_name="sales:quotation_list", permanent=False), name="sales_index"),

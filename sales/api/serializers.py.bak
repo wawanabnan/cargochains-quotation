@@ -13,7 +13,10 @@ class CargoChargeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CargoCharge
-        fields = ["id", "cargo", "description", "unit", "qty", "rate", "amount", 'description']
+        fields = [
+            "id", "cargo", "charge_type", "description", "unit",
+            "qty", "rate", "currency", "amount",
+        ]
         read_only_fields = ["amount", "cargo"]  # cargo diisi otomatis saat nested create
 
 

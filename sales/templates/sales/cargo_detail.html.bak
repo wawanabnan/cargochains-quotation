@@ -8,7 +8,6 @@
       <a class="btn btn-outline-secondary" href="{% url 'sales:quotation_detail' cargo.quotation.pk %}">Back to Quotation</a>
       {% if view.action == 'edit' %}{% else %}
       <a class="btn btn-primary" href="{% url 'sales:cargo_edit' cargo.pk %}">Edit</a>
-      <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:cargo_charges_edit' cargo.pk %}">Charges</a>
       {% endif %}
     </div>
   </div>
