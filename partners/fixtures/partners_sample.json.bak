@@ -1,0 +1,57 @@
+[
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Rindu Order",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": false,
+      "created_at": "2025-08-26T00:00:00Z",
+      "updated_at": "2025-08-26T00:00:00Z"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Nusantara Logistik",
+      "is_customer": true,
+      "is_vendor": true,
+      "is_agent": false,
+      "created_at": "2025-08-26T00:00:00Z",
+      "updated_at": "2025-08-26T00:00:00Z"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Samudera Raya",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": true,
+      "created_at": "2025-08-26T00:00:00Z",
+      "updated_at": "2025-08-26T00:00:00Z"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "CV. Berkah Jaya",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": false
+      "created_at": "2025-08-26T00:00:00Z",
+      "updated_at": "2025-08-26T00:00:00Z"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+     "name": "PT. Lintas Benua",
+      "is_customer": true,
+      "is_vendor": true,
+      "is_agent": true
+      "created_at": "2025-08-26T00:00:00Z",
+      "updated_at": "2025-08-26T00:00:00Z"
+    }
+  }
+]

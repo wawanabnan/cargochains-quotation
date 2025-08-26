@@ -1,18 +1,57 @@
 [
-  { "model": "partners.partner", "pk": 101, "fields": { "name": "PT. ABC Mining",        "is_customer": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z"  } },
-  { "model": "partners.partner", "pk": 102, "fields": { "name": "PT. Laut Nusantara",     "is_customer": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z"  } },
-  { "model": "partners.partner", "pk": 103, "fields": { "name": "PT. Cepat Kirim",       "is_customer": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z"  } },
-  { "model": "partners.partner", "pk": 104, "fields": { "name": "PT. Logistik Darat",    "is_customer": true, "is_vendor": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z" } },
-  { "model": "partners.partner", "pk": 105, "fields": { "name": "PT. Ekspor Makmur",     "is_customer": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z" } },
-  { "model": "partners.partner", "pk": 106, "fields": { "name": "PT. Multimoda Global",  "is_customer": true, "is_agent": true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z" } },
-  { "model": "partners.partner", "pk": 107, "fields": { "name": "CV. Pelayaran Jaya",    "is_vendor":   true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z"  } },
-  { "model": "partners.partner", "pk": 108, "fields": { "name": "PT. Agency Samudera",   "is_agent":    true,"created_at": "2025-08-25T09:00:00Z",
-      "updated_at": "2025-08-25T09:00:00Z"  } }
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. ABC Mining",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": false,
+      "created_at": "2025-08-26T06:02:57.111547+00:00",
+      "updated_at": "2025-08-26T06:02:57.111547+00:00"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Nusantara Logistik",
+      "is_customer": true,
+      "is_vendor": true,
+      "is_agent": false,
+      "created_at": "2025-08-26T06:02:57.111547+00:00",
+      "updated_at": "2025-08-26T06:02:57.111547+00:00"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Samudera Raya",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": true,
+      "created_at": "2025-08-26T06:02:57.111547+00:00",
+      "updated_at": "2025-08-26T06:02:57.111547+00:00"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "CV. Berkah Jaya",
+      "is_customer": true,
+      "is_vendor": false,
+      "is_agent": false,
+      "created_at": "2025-08-26T06:02:57.111547+00:00",
+      "updated_at": "2025-08-26T06:02:57.111547+00:00"
+    }
+  },
+  {
+    "model": "partners.partner",
+    "fields": {
+      "name": "PT. Lintas Benua",
+      "is_customer": true,
+      "is_vendor": true,
+      "is_agent": true,
+      "created_at": "2025-08-26T06:02:57.111547+00:00",
+      "updated_at": "2025-08-26T06:02:57.111547+00:00"
+    }
+  }
 ]

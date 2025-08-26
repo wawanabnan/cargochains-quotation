@@ -1,90 +1,104 @@
-{% extends "base.html" %}
-{% block title %}New Quotation — Start (V3){% endblock %}
+{% extends "sales/base.html" %}
+{% block title %}Start New Quotation{% endblock %}
 {% block content %}
-<div class="container-fluid">
-  <h2 class="mb-3">Create Quotation — Step 0 (V3)</h2>
-  <form method="post" class="card shadow-sm">
-    {% csrf_token %}
+<div class="container cc-container my-4">
+  <div class="cc-card">
     <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-4">
-          <label class="form-label">Transport Mode</label>
-          <div class="list-group" id="mode-group">
-            <label class="list-group-item"><input type="radio" name="mode" value="SEA" class="form-check-input me-2" checked> Sea</label>
-            <label class="list-group-item"><input type="radio" name="mode" value="AIR" class="form-check-input me-2"> Air</label>
-            <label class="list-group-item"><input type="radio" name="mode" value="LAND" class="form-check-input me-2"> Land</label>
-            <label class="list-group-item"><input type="radio" name="mode" value="MULTI" class="form-check-input me-2" > Multi Moda</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Service Type</label>
-          <select name="service_option" id="service_option" class="form-select">
-            <option value="">— (Not required for Multi)</option>
-          </select>
-          <div class="form-text">Sea: D2D/D2P/P2P · Air: A2A/D2A · Land: fixed 'TRUCKING'</div>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Multi Destination?</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="multi_destination" name="multi_destination" checked>
-            <label class="form-check-label" for="multi_destination">Yes (destination per cargo)</label>
-          </div>
-          <div class="form-text">Uncheck untuk single destination (destination akan di header Step 1)</div>
-        </div>
+      <div class="cc-steps">
+        <span class="cc-step active">Start</span>
+        <span class="cc-step sep">›</span>
+        <span class="cc-step">Header</span>
+        <span class="cc-step sep">›</span>
+        <span class="cc-step">Lines</span>
       </div>
+
+      <h5 class="mb-3">Start New Quotation</h5>
+      <form method="post" class="o-form">{% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="o-field">
+              <label>Business Type</label>
+              <div class="d-flex gap-4">
+                <label class="form-check">
+                  <input class="form-check-input" type="radio" name="business_type" value="FREIGHT" checked>
+                  <span class="form-check-label">Freight</span>
+                </label>
+                <label class="form-check">
+                  <input class="form-check-input" type="radio" name="business_type" value="SHIP_CHARTER">
+                  <span class="form-check-label">Ship Charter</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="o-field">
+              <label>Transportation Mode</label>
+              <select class="form-select" name="transport_mode" id="transport_mode">
+                <option value="LAND">Land</option>
+                <option value="SEA" selected>Sea</option>
+                <option value="AIR">Air</option>
+                <option value="MULTI">Multi</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="o-field">
+              <label>Service Option</label>
+              <select class="form-select" name="service_option" id="service_option">
+                <option value="DOOR_TO_DOOR">Door to Door</option>
+                <option value="DOOR_TO_PORT">Door to Port</option>
+                <option value="PORT_TO_DOOR">Port to Door</option>
+                <option value="PORT_TO_PORT" selected>Port to Port</option>
+                <option value="DOOR_TO_AIRPORT">Door to Airport</option>
+                <option value="AIRPORT_TO_AIRPORT">Airport to Airport</option>
+                <option value="AIRPORT_TO_DOOR">Airport to Door</option>
+                <option value="TRUCKING">Trucking</option>
+                <option value="MIXED">Multi-modal</option>
+              </select>
+              <div class="helptext">Opsi layanan disarankan berdasarkan mode.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="multi_destination" id="multi_destination" checked>
+              <label class="form-check-label" for="multi_destination">Multi Destination</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-end">
+          <button class="btn btn-primary cc-btn">Start</button>
+        </div>
+      </form>
     </div>
-    <div class="card-footer d-flex justify-content-end gap-2">
-      <a href="{% url 'sales:quotation_list' %}" class="btn btn-outline-secondary">Cancel</a>
-      <button class="btn btn-primary" type="submit">Continue</button>
-    </div>
-  </form>
+  </div>
 </div>
 
 <script>
-const SERVICE_BY_MODE = {
-  'SEA': [
-    {v:'D2D', t:'Door → Door'},
-    {v:'D2P', t:'Door → Port'},
-    {v:'P2P', t:'Port → Port'}
-  ],
-  'AIR': [
-    {v:'A2A', t:'Airport → Airport'},
-    {v:'D2A', t:'Door → Airport'}
-  ],
-  'LAND': [ {v:'TRUCKING', t:'Trucking'} ],
-  'MULTI': []
-};
-
-function fillService(mode){
-  const sel = document.getElementById('service_option');
-  sel.innerHTML = '';
-  (SERVICE_BY_MODE[mode] || []).forEach(o=>{
-    const opt = document.createElement('option');
-    opt.value = o.v; opt.textContent = o.t;
-    sel.appendChild(opt);
-  });
-  if(mode === 'MULTI'){
-    const opt = document.createElement('option');
-    opt.value = ''; opt.textContent = '— (Not required for Multi)';
-    sel.appendChild(opt);
-    sel.value = '';
-  }else if(mode === 'LAND'){
-    const opt = document.createElement('option');
-    opt.value = 'TRUCKING'; opt.textContent = 'Trucking';
-    sel.appendChild(opt);
-    sel.value = 'TRUCKING';
-  }else{
-    if(sel.options.length) sel.selectedIndex = 0;
+(function(){
+  const tm = document.getElementById('transport_mode');
+  const so = document.getElementById('service_option');
+  function refreshSO(){
+    const map = {
+      SEA:  ['DOOR_TO_DOOR','DOOR_TO_PORT','PORT_TO_DOOR','PORT_TO_PORT'],
+      AIR:  ['DOOR_TO_AIRPORT','AIRPORT_TO_AIRPORT','AIRPORT_TO_DOOR'],
+      LAND: ['TRUCKING'],
+      MULTI:['MIXED']
+    };
+    const label = {
+      DOOR_TO_DOOR:'Door to Door', DOOR_TO_PORT:'Door to Port', PORT_TO_DOOR:'Port to Door', PORT_TO_PORT:'Port to Port',
+      DOOR_TO_AIRPORT:'Door to Airport', AIRPORT_TO_AIRPORT:'Airport to Airport', AIRPORT_TO_DOOR:'Airport to Door',
+      TRUCKING:'Trucking', MIXED:'Multi-modal'
+    };
+    const arr = map[tm.value] || map.SEA;
+    so.innerHTML = '';
+    arr.forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=label[k]; so.appendChild(o);})
   }
-}
-
-document.addEventListener('change', (e)=>{
-  if(e.target.name === 'mode'){
-    fillService(e.target.value);
-  }
-});
-document.addEventListener('DOMContentLoaded', ()=>{
-  fillService(document.querySelector('input[name="mode"]:checked').value);
-});
+  tm.addEventListener('change', refreshSO);
+  refreshSO();
+})();
 </script>
 {% endblock %}

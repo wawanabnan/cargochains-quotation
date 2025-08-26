@@ -1,0 +1,134 @@
+[
+  {
+    "model": "sales.quotation",
+    "fields": {
+      "number": "Q2508-0001",
+      "date": "2025-08-26",
+      "validity_date": "2025-09-10",
+      "customer": 110,
+      "currency": "IDR",
+      "business_type": "FREIGHT",
+      "transport_mode": "SEA",
+      "service_option": "PORT_TO_PORT",
+      "multi_destination": false,
+      "origin": "Jakarta",
+      "destination": "Surabaya",
+      "notes": "Contoh quotation single-destination"
+    }
+  },
+  {
+    "model": "sales.quotation",
+    "fields": {
+      "number": "Q2508-0002",
+      "date": "2025-08-26",
+      "validity_date": "2025-09-15",
+      "customer": 111,
+      "currency": "IDR",
+      "business_type": "FREIGHT",
+      "transport_mode": "SEA",
+      "service_option": "DOOR_TO_PORT",
+      "multi_destination": true,
+      "origin": "",
+      "destination": "",
+      "notes": "Contoh quotation multi-destination"
+    }
+  },
+
+  {
+    "model": "sales.cargo",
+    "fields": {
+      "quotation": 1,
+      "description": "Steel Coil",
+      "origin": "Jakarta",
+      "destination": "Surabaya",
+      "qty": "10.00",
+      "weight_kg": "5000.00",
+      "volume_cbm": "12.5"
+    }
+  },
+  {
+    "model": "sales.cargo",
+    "fields": {
+      "quotation": 2,
+      "description": "Fertilizer",
+      "origin": "Jakarta",
+      "destination": "Medan",
+      "qty": "20.00",
+      "weight_kg": "20000.00",
+      "volume_cbm": "40.0"
+    }
+  },
+  {
+    "model": "sales.cargo",
+    "fields": {
+      "quotation": 2,
+      "description": "Fertilizer",
+      "origin": "Jakarta",
+      "destination": "Balikpapan",
+      "qty": "15.00",
+      "weight_kg": "15000.00",
+      "volume_cbm": "30.0"
+    }
+  },
+
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 1,
+      "description": "Ocean Freight",
+      "qty": "10.00",
+      "rate": "250000.00",
+      "amount": "2500000.00"
+    }
+  },
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 1,
+      "description": "THC",
+      "qty": "1.00",
+      "rate": "150000.00",
+      "amount": "150000.00"
+    }
+  },
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 2,
+      "description": "Pickup Trucking",
+      "qty": "1.00",
+      "rate": "500000.00",
+      "amount": "500000.00"
+    }
+  },
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 2,
+      "description": "Ocean Freight",
+      "qty": "20.00",
+      "rate": "275000.00",
+      "amount": "5500000.00"
+    }
+  },
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 3,
+      "description": "Pickup Trucking",
+      "qty": "1.00",
+      "rate": "500000.00",
+      "amount": "500000.00"
+    }
+  },
+  {
+    "model": "sales.cargocharge",
+    "fields": {
+      "cargo": 3,
+      "description": "Ocean Freight",
+      "qty": "15.00",
+      "rate": "275000.00",
+      "amount": "4125000.00"
+    }
+  }
+]

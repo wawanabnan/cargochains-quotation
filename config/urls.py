@@ -7,5 +7,5 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('api/', include('sales.api.urls')),
-    path('sales/', include('sales.urls')),
+    path('sales/', include(('sales.urls','sales'), namespace='sales'))
 ]

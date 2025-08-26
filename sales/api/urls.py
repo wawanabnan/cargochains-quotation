@@ -1,12 +1,7 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import QuotationViewSet, CargoViewSet, CargoChargeViewSet
+from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register(r"quotations", QuotationViewSet, basename="api-quotation")
-router.register(r"cargos", CargoViewSet, basename="api-cargo")
-router.register(r"charges", CargoChargeViewSet, basename="api-charge")
-
+app_name = "sales_api"
 urlpatterns = [
-    path("", include(router.urls)),
+    path("ping/", views.ping, name="ping"),
 ]
