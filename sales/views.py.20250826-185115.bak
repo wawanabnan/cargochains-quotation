@@ -16,40 +16,8 @@ from .forms import (
 # ====== List & Detail ======
 def quotation_list(request):
     qs = Quotation.objects.select_related("customer").order_by("-date","number")
-    
-     # --- optional filters ---
-    q = request.GET.get("q") or ""
-    df = request.GET.get("df") or ""
-    dt = request.GET.get("dt") or ""
-    mode = request.GET.get("mode") or ""
-    md = request.GET.get("md") or ""  # "1" / "0"
-
-    if q:
-        qs = qs.filter(
-            Q(number__icontains=q) |
-            Q(customer__icontains=q) |
-            Q(notes__icontains=q)
-        )
-    if df:
-        qs = qs.filter(date__gte=df)
-    if dt:
-        qs = qs.filter(date__lte=dt)
-    if mode:
-        qs = qs.filter(transport_mode=mode)
-    if md in ("1", "0"):
-        qs = qs.filter(multi_destination=(md == "1"))
-    
-    paginator = Paginator(qs, 20)
-    page = request.GET.get("page")
-    page_obj = paginator.get_page(page)
-        
     page_obj = Paginator(qs, 20).get_page(request.GET.get("page"))
-    
-    
-    return render(request, "sales/quotation_list.html", {
-        "page_obj": page_obj,
-        "quotations": page_obj.object_list,
-    })
+    return render(request, "sales/quotation_list.html", {"page_obj": page_obj})
 
 def quotation_detail(request, pk):
     q = get_object_or_404(Quotation.objects.select_related("customer"), pk=pk)

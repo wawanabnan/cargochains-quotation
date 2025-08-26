@@ -1,0 +1,17 @@
+/* static/css/adminlte-fixes.css */
+.table td, .table th { vertical-align: middle; }
+.table .form-control { height: calc(1.5rem + 2px); padding: .25rem .5rem; }
+.table .form-check-input { margin-top: .2rem; }
+.table thead th { white-space: nowrap; }
+
+.col-min-80   { min-width: 80px; }
+.col-min-100  { min-width: 100px; }
+.col-min-120  { min-width: 120px; }
+.col-min-140  { min-width: 140px; }
+.col-min-160  { min-width: 160px; }
+
+/* Select full width di cell */
+td .form-control, td .form-select { width: 100% !important; }
+
+/* Card spacing */
+.card .card-header .card-title { margin-bottom: 0; }

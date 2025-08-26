@@ -1,0 +1,51 @@
+body
+
+{
+   
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8375rem !important;
+}
+
+.bg-body-tertiary {
+    --bs-bg-opacity: 1;
+    background-color: #fff !important;
+}
+
+ th:first-child, tr td:first-child {
+        /* CSS properties for the first <th> */
+       
+        color: navy;
+        font-weight: bold;
+        text-align: center;
+}
+
+td {
+  padding: 13px 5px;
+}
+
+
+input,
+textarea,
+select {
+  font-size: 0.850rem !important;;       /* Sesuaikan dengan kebutuhan, bisa 0.875rem */
+  font-family: 'Inter', sans-serif;
+}
+
+input[type=text] 
+{
+  padding:0.2rem 0.7rem
+}
+
+.bg-body-image {
+    background-image: url("");
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-size: cover; /* Scale the image to cover the entire viewport while maintaining aspect ratio */
+    background-position: center center; /* Center the image horizontally and vertically */
+    background-attachment: fixed; /* Keep the background image fixed while content scrolls */
+    background-blend-mode: overlay;
+    height: 100vh; /* Ensure the body takes up the full viewport height */
+    width: 100vw; /* Ensure the body takes up the full viewport width */
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+   
+}
