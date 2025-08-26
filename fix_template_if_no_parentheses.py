@@ -1,3 +1,17 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+TPL = ROOT / "sales" / "templates" / "sales"
+dst = TPL / "quotation_detail.html"
+
+def backup(p: Path):
+    if p.exists():
+        b = p.with_suffix(p.suffix + ".bak")
+        if not b.exists():
+            b.write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+            print("• backup ->", b)
+
+html = r"""
 {% extends "sales/base.html" %}
 {% load sales_extras %}
 {% block title %}Quotation {{ q.number }}{% endblock %}
@@ -20,6 +34,7 @@
           <div class="cc-muted mb-1">{{ q.date }} · {{ q.customer }} · {{ q.currency }}</div>
           <div><strong>Mode:</strong> {{ q.transport_mode }} &middot; <strong>Service:</strong> {{ q.service_option }}</div>
           <div><strong>Multi-destination:</strong> {{ q.multi_destination }}</div>
+          {# TIDAK pakai tanda kurung di if #}
           {% if not q.multi_destination %}
             {% if q.origin or q.destination %}
               <div><strong>Header O/D:</strong> {{ q.origin|default:"-" }} → {{ q.destination|default:"-" }}</div>
@@ -49,31 +64,31 @@
           {% endif %}
         </div>
 
-        <!-- Cargo Detail: kolom di atas, nilai 1 baris -->
+        <!-- Cargo Detail (tanpa charge) -->
         <div class="cc-card mb-2">
           <div class="p-3">
             <div class="table-responsive">
               <table class="table table-sm cc-table mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th>Qty</th>
-                    <th>Weight (kg)</th>
-                    <th>Volume (cbm)</th>
+                    <th style="width:160px;">Field</th>
+                    <th>Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>{{ c.qty|default:"-" }}</td>
-                    <td>{{ c.weight_kg|default:"-" }}</td>
-                    <td>{{ c.volume_cbm|default:"-" }}</td>
-                  </tr>
+                  {% if c.qty %}<tr><td>Qty</td><td>{{ c.qty }}</td></tr>{% endif %}
+                  {% if c.weight_kg %}<tr><td>Weight (kg)</td><td>{{ c.weight_kg }}</td></tr>{% endif %}
+                  {% if c.volume_cbm %}<tr><td>Volume (cbm)</td><td>{{ c.volume_cbm }}</td></tr>{% endif %}
+                  {% if not c.qty and not c.weight_kg and not c.volume_cbm %}
+                    <tr><td colspan="2" class="cc-muted">No cargo metrics</td></tr>
+                  {% endif %}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
 
-        <!-- Line Charges: terpisah di bawah cargo -->
+        <!-- Line Charges (dipisah) -->
         <div class="cc-card">
           <div class="p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -123,3 +138,12 @@
   {% endif %}
 </div>
 {% endblock %}
+"""
+
+if not TPL.exists():
+    raise SystemExit(f"Templates folder not found: {TPL}")
+
+# backup dan tulis
+backup(dst)
+dst.write_text(html.strip() + "\n", encoding="utf-8")
+print("✓ Fixed:", dst)

@@ -1,3 +1,39 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+APP = ROOT / "sales"
+TPL = APP / "templates" / "sales"
+TT_DIR = APP / "templatetags"
+
+def backup(p: Path):
+    if p.exists():
+        b = p.with_suffix(p.suffix + ".bak")
+        if not b.exists():
+            b.write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+            print("• backup ->", b)
+
+def write(p: Path, s: str):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(s.strip() + "\n", encoding="utf-8")
+    print("• write ", p)
+
+# pastikan filter get_item ada
+filters_py = """
+from django import template
+register = template.Library()
+
+@register.filter
+def get_item(d, k):
+    try:
+        return d.get(k, 0)
+    except Exception:
+        return 0
+"""
+TT_DIR.mkdir(parents=True, exist_ok=True)
+backup(TT_DIR / "sales_extras.py")
+write(TT_DIR / "sales_extras.py", filters_py)
+
+html = r"""
 {% extends "sales/base.html" %}
 {% load sales_extras %}
 {% block title %}Quotation {{ q.number }}{% endblock %}
@@ -20,10 +56,8 @@
           <div class="cc-muted mb-1">{{ q.date }} · {{ q.customer }} · {{ q.currency }}</div>
           <div><strong>Mode:</strong> {{ q.transport_mode }} &middot; <strong>Service:</strong> {{ q.service_option }}</div>
           <div><strong>Multi-destination:</strong> {{ q.multi_destination }}</div>
-          {% if not q.multi_destination %}
-            {% if q.origin or q.destination %}
-              <div><strong>Header O/D:</strong> {{ q.origin|default:"-" }} → {{ q.destination|default:"-" }}</div>
-            {% endif %}
+          {% if not q.multi_destination and (q.origin or q.destination) %}
+            <div><strong>Header O/D:</strong> {{ q.origin|default:"-" }} → {{ q.destination|default:"-" }}</div>
           {% endif %}
         </div>
         {% if q.notes %}
@@ -49,31 +83,28 @@
           {% endif %}
         </div>
 
-        <!-- Cargo Detail: kolom di atas, nilai 1 baris -->
+        <!-- Cargo Detail (tanpa charge) -->
         <div class="cc-card mb-2">
           <div class="p-3">
             <div class="table-responsive">
               <table class="table table-sm cc-table mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th>Qty</th>
-                    <th>Weight (kg)</th>
-                    <th>Volume (cbm)</th>
+                    <th style="width:160px;">Field</th>
+                    <th>Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>{{ c.qty|default:"-" }}</td>
-                    <td>{{ c.weight_kg|default:"-" }}</td>
-                    <td>{{ c.volume_cbm|default:"-" }}</td>
-                  </tr>
+                  <tr><td>Qty</td><td>{{ c.qty|default:"-" }}</td></tr>
+                  <tr><td>Weight (kg)</td><td>{{ c.weight_kg|default:"-" }}</td></tr>
+                  <tr><td>Volume (cbm)</td><td>{{ c.volume_cbm|default:"-" }}</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
 
-        <!-- Line Charges: terpisah di bawah cargo -->
+        <!-- Line Charges (dipisah) -->
         <div class="cc-card">
           <div class="p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -123,3 +154,9 @@
   {% endif %}
 </div>
 {% endblock %}
+"""
+detail_p = TPL / "quotation_detail.html"
+backup(detail_p)
+write(detail_p, html)
+
+print("\n✓ Done. Reload halaman detail quotation.")

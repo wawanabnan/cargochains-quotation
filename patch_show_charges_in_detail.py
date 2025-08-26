@@ -1,3 +1,23 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+APP = ROOT / "sales"
+TPL = APP / "templates" / "sales"
+
+def backup(p: Path):
+    if p.exists():
+        b = p.with_suffix(p.suffix + ".bak")
+        if not b.exists():
+            b.write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+            print("• backup ->", b)
+
+def write(p: Path, s: str):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(s.strip() + "\n", encoding="utf-8")
+    print("• write ", p)
+
+# ---- views.py (add cargo_totals & grand_total in quotation_detail) ----
+views_patch = r"""
 from django import forms as djforms
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -177,3 +197,145 @@ def quotation_pdf(request, pk, kind="detail"):
         return response
     except Exception:
         return HttpResponse(html)
+"""
+
+detail_tpl = r"""
+{% extends "sales/base.html" %}
+{% block title %}Quotation {{ q.number }}{% endblock %}
+{% block content %}
+<div class="container-fluid cc-container my-4">
+
+  <div class="cc-toolbar">
+    <h4 class="cc-title">Quotation {{ q.number|default:"(draft)" }}</h4>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-primary cc-btn" target="_blank" href="{% url 'sales:quotation_pdf' pk=q.pk kind='summary' %}">PDF Summary</a>
+      <a class="btn btn-outline-primary cc-btn" target="_blank" href="{% url 'sales:quotation_pdf' pk=q.pk kind='detail' %}">PDF Detail</a>
+      <a class="btn btn-outline-secondary cc-btn" href="{% url 'sales:quotation_list' %}">Back</a>
+    </div>
+  </div>
+
+  <div class="cc-card mb-3">
+    <div class="p-3">
+      <div class="row">
+        <div class="col-md-7">
+          <div class="cc-muted mb-1">{{ q.date }} · {{ q.customer }} · {{ q.currency }}</div>
+          <div><strong>Mode:</strong> {{ q.transport_mode }} &middot; <strong>Service:</strong> {{ q.service_option }}</div>
+          <div><strong>Multi-destination:</strong> {{ q.multi_destination }}</div>
+          {% if q.origin or q.destination %}
+          <div><strong>Header O/D:</strong> {{ q.origin|default:"-" }} → {{ q.destination|default:"-" }}</div>
+          {% endif %}
+        </div>
+        {% if q.notes %}
+        <div class="col-md-5">
+          <div class="border-start ps-3">
+            <div class="cc-muted small">Notes</div>
+            <div>{{ q.notes }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if q.business_type == 'FREIGHT' %}
+    <div class="cc-card">
+      <div class="p-3">
+        <h6 class="mb-2">Cargos & Charges</h6>
+
+        {% for c in q.cargos.all %}
+          <div class="mb-3">
+            <div class="fw-semibold">{{ c.description }} <span class="cc-muted">({{ c.origin|default:"-" }} → {{ c.destination|default:"-" }})</span></div>
+
+            <div class="table-responsive">
+              <table class="table table-sm cc-table mb-1">
+                <thead class="table-light">
+                  <tr>
+                    <th>Description</th>
+                    <th class="text-end" style="width:120px;">Qty</th>
+                    <th class="text-end" style="width:140px;">Rate</th>
+                    <th class="text-end" style="width:160px;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for ch in c.charges.all %}
+                  <tr>
+                    <td>{{ ch.description }}</td>
+                    <td class="text-end">{{ ch.qty }}</td>
+                    <td class="text-end">{{ ch.rate }}</td>
+                    <td class="text-end">{{ ch.amount }}</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="4" class="text-center cc-muted">No charges</td></tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th colspan="3" class="text-end">Subtotal</th>
+                    <th class="text-end">
+                      {{ cargo_totals.c.id }} {# placeholder to avoid errors if not exists #}
+                      {% if cargo_totals and c.id in cargo_totals %}
+                        {{ cargo_totals.c.id }}
+                      {% endif %}
+                    </th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-center cc-muted">No cargos</div>
+        {% endfor %}
+
+        {% if grand_total %}
+          <div class="d-flex justify-content-end mt-2">
+            <div class="fw-semibold">Grand Total: {{ grand_total }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+"""
+
+# NOTE: Django template tidak mendukung akses dictionary dengan key dinamis secara langsung.
+# Kita akan tweak sedikit subtotal rendering supaya tidak error:
+# Ganti blok <th class="text-end"> subtotal </th> jadi gunakan filter default jika key tak ada.
+detail_tpl = detail_tpl.replace(
+    "{{ cargo_totals.c.id }} {# placeholder to avoid errors if not exists #}\n                      {% if cargo_totals and c.id in cargo_totals %}\n                        {{ cargo_totals.c.id }}\n                      {% endif %}",
+    "{% if cargo_totals %}{{ cargo_totals|get_item:c.id|default:'0' }}{% else %}0{% endif %}"
+)
+
+# Tambahkan custom template filter get_item (simple) ke templatetags jika belum ada
+TT_DIR = APP / "templatetags"
+TT_DIR.mkdir(parents=True, exist_ok=True)
+filters_py = """
+from django import template
+register = template.Library()
+
+@register.filter
+def get_item(d, k):
+    try:
+        return d.get(k, 0)
+    except Exception:
+        return 0
+"""
+backup(TT_DIR / "sales_extras.py")
+write(TT_DIR / "sales_extras.py", filters_py)
+
+# Update base.html agar load templatetags otomatis? Tidak perlu; load di template detail saja.
+detail_tpl = detail_tpl.replace("{% extends \"sales/base.html\" %}",
+                                "{% extends \"sales/base.html\" %}\n{% load sales_extras %}")
+
+# Tulis file
+views_p = APP / "views.py"
+detail_p = TPL / "quotation_detail.html"
+
+backup(views_p)
+write(views_p, views_patch)
+
+backup(detail_p)
+write(detail_p, detail_tpl)
+
+print("\n✓ Patch applied. Now reload the detail page.")

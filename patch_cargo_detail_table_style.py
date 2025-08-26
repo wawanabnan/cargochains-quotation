@@ -1,3 +1,17 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+TPL = ROOT / "sales" / "templates" / "sales"
+dst = TPL / "quotation_detail.html"
+
+def backup(p: Path):
+    if p.exists():
+        b = p.with_suffix(p.suffix + ".bak")
+        if not b.exists():
+            b.write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+            print("• backup ->", b)
+
+html = r"""
 {% extends "sales/base.html" %}
 {% load sales_extras %}
 {% block title %}Quotation {{ q.number }}{% endblock %}
@@ -123,3 +137,11 @@
   {% endif %}
 </div>
 {% endblock %}
+"""
+
+if not TPL.exists():
+    raise SystemExit(f"Templates folder not found: {TPL}")
+
+backup(dst)
+dst.write_text(html.strip() + "\n", encoding="utf-8")
+print("✓ Updated:", dst)
