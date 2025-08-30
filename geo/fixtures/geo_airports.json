@@ -1,0 +1,312 @@
+[
+  {
+    "model": "geo.location",
+    "pk": 225,
+    "fields": {
+      "name": "Soekarno-Hatta International",
+      "code": "CGK",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 226,
+    "fields": {
+      "name": "Halim Perdanakusuma",
+      "code": "HLP",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 227,
+    "fields": {
+      "name": "Kualanamu",
+      "code": "KNO",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 228,
+    "fields": {
+      "name": "Minangkabau",
+      "code": "PDG",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 229,
+    "fields": {
+      "name": "Sultan Syarif Kasim II",
+      "code": "PKU",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 230,
+    "fields": {
+      "name": "Sultan Mahmud Badaruddin II",
+      "code": "PLM",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 231,
+    "fields": {
+      "name": "Sultan Thaha",
+      "code": "DJB",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 232,
+    "fields": {
+      "name": "Sultan Iskandar Muda",
+      "code": "BTJ",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 233,
+    "fields": {
+      "name": "Hang Nadim",
+      "code": "BTH",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 234,
+    "fields": {
+      "name": "Raja Haji Fisabilillah",
+      "code": "TNJ",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 235,
+    "fields": {
+      "name": "Depati Amir",
+      "code": "PGK",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 236,
+    "fields": {
+      "name": "Sultan Hasanuddin",
+      "code": "UPG",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 237,
+    "fields": {
+      "name": "Juanda",
+      "code": "SUB",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 238,
+    "fields": {
+      "name": "Adisutjipto",
+      "code": "JOG",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 239,
+    "fields": {
+      "name": "Yogyakarta International",
+      "code": "YIA",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 240,
+    "fields": {
+      "name": "Adisumarmo",
+      "code": "SOC",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 241,
+    "fields": {
+      "name": "Ahmad Yani",
+      "code": "SRG",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 242,
+    "fields": {
+      "name": "Husein Sastranegara",
+      "code": "BDO",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 243,
+    "fields": {
+      "name": "I Gusti Ngurah Rai",
+      "code": "DPS",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 244,
+    "fields": {
+      "name": "Lombok International",
+      "code": "LOP",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 245,
+    "fields": {
+      "name": "El Tari",
+      "code": "KOE",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 246,
+    "fields": {
+      "name": "Sepinggan (SAMS)",
+      "code": "BPN",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 247,
+    "fields": {
+      "name": "Sultan Babullah",
+      "code": "TTE",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 248,
+    "fields": {
+      "name": "Frans Kaisiepo",
+      "code": "BIK",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 249,
+    "fields": {
+      "name": "Mopah",
+      "code": "MKQ",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 250,
+    "fields": {
+      "name": "Domine Eduard Osok",
+      "code": "SOQ",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 251,
+    "fields": {
+      "name": "Sam Ratulangi",
+      "code": "MDC",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 252,
+    "fields": {
+      "name": "Mutiara SIS Al-Jufrie",
+      "code": "PLW",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 253,
+    "fields": {
+      "name": "Sultan Aji Muhammad Sulaiman",
+      "code": "BPN2",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 254,
+    "fields": {
+      "name": "Sentani",
+      "code": "DJJ",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 255,
+    "fields": {
+      "name": "Juanda (Alternate)",
+      "code": "SUB2",
+      "country": "ID",
+      "type": "AIRPORT"
+    }
+  }
+]

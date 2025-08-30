@@ -1,10 +1,16 @@
 from django.urls import path
 from . import views
+
 app_name = "sales"
+
 urlpatterns = [
-    path("quotations/", views.quotation_list, name="quotation_list"),
-    path("quotations/wizard/v3/start/", views.quotation_wizard_v3_start, name="quotation_wizard_v3_start"),
-    path("quotations/freight/new/", views.freight_wizard, name="freight_wizard"),
-    path("quotations/<int:pk>/", views.quotation_detail, name="quotation_detail"),
-    path("quotations/<int:pk>/pdf/<str:kind>/", views.quotation_pdf, name="quotation_pdf"),
+    path('quotations/freight/new/', views.freight_create_wizard, name='freight_new'),
+    # FREIGHT
+    path("quotations/freight/", views.freight_list, name="freight_list"),
+  #  path("quotations/freight/<int:pk>/edit/", views.freight_edit, name="freight_edit"),
+    path("quotations/freight/<int:pk>/view/", views.freight_view, name="freight_view"),
+    # AJAX
+    path("quotations/freight/service-options/", views.freight_service_options, name="freight_service_options"),
+
+   
 ]

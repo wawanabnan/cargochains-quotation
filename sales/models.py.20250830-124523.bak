@@ -1,0 +1,54 @@
+from django.db import models
+from django.conf import settings
+from partners.models import Partner
+
+
+class FreightQuotation(models.Model):
+    BUSINESS_TYPE = "FREIGHT"
+
+    number = models.CharField(max_length=50, unique=True, blank=True)
+    date = models.DateField()
+    # TODO: Ganti ke model Customer/Partner Anda jika ada (mis. partners.Partner)
+    customer = models.ForeignKey(Partner, on_delete=models.PROTECT)
+    currency = models.CharField(max_length=10, default="IDR")
+    transport_mode = models.CharField(max_length=20, choices=[("SEA","Sea"),("AIR","Air"),("LAND","Land")])
+    service_option = models.CharField(max_length=50)
+    notes = models.TextField(blank=True)
+
+    # single-destination: isi di header; multi: kosong & isi per cargo
+    multi_destination = models.BooleanField(default=False)
+    payment_term = models.CharField(max_length=50, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-date", "-id")
+
+    def __str__(self):
+        return self.number or f"FQ-{self.pk}"
+
+class FreightCargo(models.Model):
+    quotation = models.ForeignKey(FreightQuotation, on_delete=models.CASCADE, related_name="cargos")
+    description = models.CharField(max_length=255)
+    qty = models.PositiveIntegerField(default=1)
+    weight_kg = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
+    volume_cbm = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
+    amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+    # untuk multi-destination
+    origin = models.CharField(max_length=100, blank=True)
+    destination = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.description
+
+class FreightCharge(models.Model):
+    cargo = models.ForeignKey(FreightCargo, on_delete=models.CASCADE, related_name="charges")
+    description = models.CharField(max_length=255, blank=True)
+    qty = models.PositiveIntegerField(default=0)
+    rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+    def __str__(self):
+        return self.description or f"Charge-{self.pk}"

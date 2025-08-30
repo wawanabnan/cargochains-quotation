@@ -1,0 +1,262 @@
+[
+  {
+    "model": "geo.location",
+    "pk": 256,
+    "fields": {
+      "name": "Jetty KPC (Sangatta)",
+      "code": "KPCJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 257,
+    "fields": {
+      "name": "Jetty Indominco (Bontang)",
+      "code": "IMCJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 258,
+    "fields": {
+      "name": "Jetty Berau Coal (Tanjung Redeb)",
+      "code": "BRUJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 259,
+    "fields": {
+      "name": "Jetty Bayan (Balikpapan Bay)",
+      "code": "BYNJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 260,
+    "fields": {
+      "name": "Jetty Kideco (Paser)",
+      "code": "KDCJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 261,
+    "fields": {
+      "name": "Jetty Pupuk Kaltim (Bontang)",
+      "code": "PKTJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 262,
+    "fields": {
+      "name": "Jetty Pertamina RU V (Balikpapan)",
+      "code": "PTMJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 263,
+    "fields": {
+      "name": "Jetty Adaro (Tabalong)",
+      "code": "ADRJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 264,
+    "fields": {
+      "name": "Jetty Borneo Indobara (Bunati)",
+      "code": "BIBJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 265,
+    "fields": {
+      "name": "Jetty Arutmin (Satui)",
+      "code": "ARTST",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 266,
+    "fields": {
+      "name": "Jetty Arutmin (Asam-Asam)",
+      "code": "ARTAA",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 267,
+    "fields": {
+      "name": "Jetty Jorong Barutama Greston",
+      "code": "JBGJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 268,
+    "fields": {
+      "name": "Jetty Kelanis (Barito)",
+      "code": "KLNJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 269,
+    "fields": {
+      "name": "Jetty Tarakan Coal Terminal",
+      "code": "TRKJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 270,
+    "fields": {
+      "name": "Jetty Bukit Asam (Tarahan)",
+      "code": "BAJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 271,
+    "fields": {
+      "name": "Jetty Bukit Asam (Kertapati)",
+      "code": "BAKRP",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 272,
+    "fields": {
+      "name": "Jetty Pertamina RU II (Dumai)",
+      "code": "PR2JT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 273,
+    "fields": {
+      "name": "Jetty Pelindo II (Cigading)",
+      "code": "CGDJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 274,
+    "fields": {
+      "name": "Jetty Krakatau Steel (Cilegon)",
+      "code": "KSTJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 275,
+    "fields": {
+      "name": "Jetty PLN (Suralaya)",
+      "code": "PLNJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 276,
+    "fields": {
+      "name": "Jetty Holcim (Cilacap)",
+      "code": "HLCJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 277,
+    "fields": {
+      "name": "Jetty Petrokimia Gresik",
+      "code": "PKGJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 278,
+    "fields": {
+      "name": "Jetty Semen Gresik (Gresik)",
+      "code": "SMGJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 279,
+    "fields": {
+      "name": "Jetty Antam (Pomalaa)",
+      "code": "ANTJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 280,
+    "fields": {
+      "name": "Jetty Vale (Sorowako)",
+      "code": "VALJT",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 281,
+    "fields": {
+      "name": "Jetty LNG Tangguh (Bintuni)",
+      "code": "LNGTG",
+      "country": "ID",
+      "type": "JETTY"
+    }
+  }
+]

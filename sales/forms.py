@@ -1,71 +1,122 @@
 from django import forms
-from django.forms import inlineformset_factory, BaseInlineFormSet
-from .models import Quotation, Cargo, CargoCharge, CharterLeg, CharterCharge
+from django.utils import timezone
+from django.forms import formset_factory
+from partners.models import CustomerProxy
+from .models import FreightQuotation, FreightCargo, FreightCharge
+from geo.models import Location
 
-class QuotationFreightForm(forms.ModelForm):
+TRANSPORT_CHOICES = [
+    ("SEA", "Sea"),
+    ("AIR", "Air"),
+    ("LAND", "Land"),
+]
+
+SERVICE_CHOICES_UNION = [
+    ("DOOR_TO_DOOR", "Door to Door"),
+    ("DOOR_TO_PORT", "Door to Port"),
+    ("PORT_TO_PORT", "Port to Port"),
+    ("DOOR_TO_AIRPORT", "Door to Airport"),
+    ("AIRPORT_TO_AIRPORT", "Airport to Airport"),
+    ("TRUCKING", "Trucking"),
+]
+
+CURRENCY_CHOICES = [
+    ("IDR", "IDR"), ("USD", "USD"), ("EUR", "EUR"),
+    ("JPY", "JPY"), ("SGD", "SGD"), ("AUD", "AUD"),
+    ("MYR", "MYR"), ("CNY", "CNY"),
+]
+
+PAYMENT_TERM_CHOICES = [
+    ("CASH", "Cash"),
+    ("COD", "Cash on Delivery"),
+    ("TT_ADVANCE", "TT in Advance"),
+    ("NET7", "Net 7"),
+    ("NET14", "Net 14"),
+    ("NET30", "Net 30"),
+]
+
+
+class FreightHeaderForm(forms.ModelForm):
+    date = forms.DateField(
+        initial=timezone.now().date,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control form-control-sm"})
+    )
+    transport_mode = forms.ChoiceField(
+        label="Moda Transportasi",
+        choices=TRANSPORT_CHOICES,
+        initial="SEA",
+        widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+    service_option = forms.ChoiceField(
+        label="Service Option",
+        choices=SERVICE_CHOICES_UNION,
+        initial="DOOR_TO_DOOR",
+        widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+    currency = forms.ChoiceField(
+        label="Currency",
+        choices=CURRENCY_CHOICES,
+        initial="IDR",
+        widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+    payment_term = forms.ChoiceField(
+        label="Payment Term",
+        choices=PAYMENT_TERM_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+
     class Meta:
-        model = Quotation
-        fields = ["date","validity_date","customer","currency",
-                  "transport_mode","service_option","multi_destination",
-                  "origin","destination","notes"]
+        model = FreightQuotation
+        fields = ["date", "customer", "currency", "payment_term", "notes"]
         widgets = {
-            "date": forms.DateInput(attrs={"type":"date"}),
-            "validity_date": forms.DateInput(attrs={"type":"date"}),
-            "notes": forms.Textarea(attrs={"rows":2}),
+            "customer": forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"}),
+            "notes": forms.Textarea(attrs={"class": "form-control form-control-sm", "rows": 2}),
         }
 
-class QuotationCharterForm(forms.ModelForm):
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.initial.get("date"):
+            self.fields["date"].initial = timezone.localdate() 
+
+        # dropdown customer berisi semua customer
+        self.fields["customer"].queryset = CustomerProxy.objects.all()
+
+# --- Freight forms (clean) ---
+class FreightCargoForm(forms.ModelForm):
+    # queryset akan di-set di views sesuai transport_mode
+    origin = forms.ModelChoiceField(
+        queryset=Location.objects.none(), required=False,
+        widget=forms.Select(attrs={"class": "form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+    destination = forms.ModelChoiceField(
+        queryset=Location.objects.none(), required=False,
+        widget=forms.Select(attrs={"class": "form-select form-select-sm border-0 bg-transparent p-0"})
+    )
+
     class Meta:
-        model = Quotation
-        fields = ["date","validity_date","customer","currency",
-                  "charter_type","vessel_name","vessel_type","dwt_mt",
-                  "laycan_start","laycan_end","laytime_allowed_hours","reversible_laytime",
-                  "demurrage_usd_per_day","despatch_usd_per_day","bunker_terms","notes"]
+        model = FreightCargo
+        fields = ["description","qty","weight_kg","volume_cbm","price","amount","origin","destination"]
         widgets = {
-            "date": forms.DateInput(attrs={"type":"date"}),
-            "validity_date": forms.DateInput(attrs={"type":"date"}),
-            "laycan_start": forms.DateInput(attrs={"type":"date"}),
-            "laycan_end": forms.DateInput(attrs={"type":"date"}),
-            "notes": forms.Textarea(attrs={"rows":2}),
+            "description": forms.TextInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0"}),
+            "qty": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end","value":"1"}),
+            "weight_kg": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
+            "volume_cbm": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
+            "price": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
+            "amount": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
         }
 
-class BaseCargoChargeFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        seen = set()
-        for form in self.forms:
-            if not hasattr(form, "cleaned_data"):
-                continue
-            if self.can_delete and form.cleaned_data.get("DELETE"):
-                continue
-            desc = (form.cleaned_data.get("description") or "").strip().lower()
-            if not desc:
-                continue
-            if desc in seen:
-                raise forms.ValidationError("Duplicate charge description on the same cargo.")
-            seen.add(desc)
+class FreightChargeForm(forms.ModelForm):
+    class Meta:
+        model = FreightCharge
+        fields = ["description","qty","rate","amount"]
+        widgets = {
+            "description": forms.TextInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0"}),
+            "qty": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end","value":"1"}),
+            "rate": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
+            "amount": forms.NumberInput(attrs={"class": "form-control form-control-sm border-0 bg-transparent p-0 text-end"}),
+        }
 
-CargoFormSet = inlineformset_factory(
-    Quotation, Cargo,
-    fields=["description","origin","destination","qty","weight_kg","volume_cbm"],
-    extra=1, can_delete=True
-)
-
-CargoChargeFormSet = inlineformset_factory(
-    Cargo, CargoCharge,
-    fields=["description","qty","rate"],
-    extra=1, can_delete=True,
-    formset=BaseCargoChargeFormSet
-)
-
-LegFormSet = inlineformset_factory(
-    Quotation, CharterLeg,
-    fields=["order","kind","port","terminal","remarks"],
-    extra=1, can_delete=True
-)
-
-CharterChargeFormSet = inlineformset_factory(
-    Quotation, CharterCharge,
-    fields=["description","qty","rate"],
-    extra=1, can_delete=True
-)
+CargoFormSet  = formset_factory(FreightCargoForm,  extra=2, min_num=1, validate_min=True)
+ChargeFormSet = formset_factory(FreightChargeForm, extra=2, min_num=0, validate_min=False)

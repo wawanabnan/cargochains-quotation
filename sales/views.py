@@ -1,211 +1,246 @@
-from django import forms as djforms
+# sales/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.core.paginator import Paginator
+from django.contrib import messages
+from django.views.decorators.http import require_http_methods, require_GET
 from django.db import transaction
-from django.db.models import Sum
-from django.http import HttpResponse
-from django.template.loader import render_to_string
+from django.http import JsonResponse
+import datetime
 
-from .models import Quotation
+from .models import FreightQuotation, FreightCargo, FreightCharge
+from geo.models import Location
 from .forms import (
-    QuotationFreightForm, CargoFormSet,
-    QuotationCharterForm, LegFormSet, CharterChargeFormSet
+    FreightHeaderForm, FreightCargoForm, FreightChargeForm,
+    CargoFormSet, ChargeFormSet
 )
 
-# ====== List & Detail ======
-def quotation_list(request):
-    qs = Quotation.objects.select_related("customer").order_by("-date","number")
-    
-     # --- optional filters ---
-    q = request.GET.get("q") or ""
-    df = request.GET.get("df") or ""
-    dt = request.GET.get("dt") or ""
-    mode = request.GET.get("mode") or ""
-    md = request.GET.get("md") or ""  # "1" / "0"
+# --- AJAX: service options by transport mode ---
+SERVICE_OPTIONS_BY_MODE = {
+    "SEA": [("DOOR_TO_DOOR","Door to Door"), ("DOOR_TO_PORT","Door to Port"), ("PORT_TO_PORT","Port to Port")],
+    "AIR": [("DOOR_TO_AIRPORT","Door to Airport"), ("AIRPORT_TO_AIRPORT","Airport to Airport")],
+    "LAND": [("TRUCKING","Trucking")],
+}
 
-    if q:
-        qs = qs.filter(
-            Q(number__icontains=q) |
-            Q(customer__icontains=q) |
-            Q(notes__icontains=q)
-        )
-    if df:
-        qs = qs.filter(date__gte=df)
-    if dt:
-        qs = qs.filter(date__lte=dt)
-    if mode:
-        qs = qs.filter(transport_mode=mode)
-    if md in ("1", "0"):
-        qs = qs.filter(multi_destination=(md == "1"))
-    
-    paginator = Paginator(qs, 20)
-    page = request.GET.get("page")
-    page_obj = paginator.get_page(page)
-        
-    page_obj = Paginator(qs, 20).get_page(request.GET.get("page"))
-    
-    
-    return render(request, "sales/quotation_list.html", {
-        "page_obj": page_obj,
-        "quotations": page_obj.object_list,
-    })
 
-def quotation_detail(request, pk):
-    q = get_object_or_404(Quotation.objects.select_related("customer"), pk=pk)
-    if q.business_type == "FREIGHT":
-        q = (
-            Quotation.objects
-            .filter(pk=pk)
-            .select_related("customer")
-            .prefetch_related("cargos__charges")
-            .first()
-        )
-        cargo_totals = []
-        grand_total = 0
-        for c in q.cargos.all():
-            tot = c.charges.aggregate(s=Sum("amount")).get("s") or 0
-            cargo_totals.append((c.id, float(tot)))
-            grand_total += float(tot)
-    else:
-        q = (
-            Quotation.objects
-            .filter(pk=pk)
-            .select_related("customer")
-            .prefetch_related("legs","charter_charges")
-            .first()
-        )
-        cargo_totals = []
-        grand_total = 0
+def freight_list(request):
+    qs = FreightQuotation.objects.all().order_by("-id")
+    return render(request, "sales/freight/list.html", {"quotations": qs})
 
-    # peta {cargo_id: total}
-    cargo_totals_map = {cid: tot for cid, tot in cargo_totals}
 
-    return render(
-        request,
-        "sales/quotation_detail.html",
-        {"q": q, "cargo_totals": cargo_totals_map, "grand_total": grand_total},
-    )
+@require_GET
+def freight_service_options(request):
+    mode = (request.GET.get("mode") or "").upper()
+    options = [{"value": v, "label": l} for v, l in SERVICE_OPTIONS_BY_MODE.get(mode, [])]
+    return JsonResponse({"mode": mode, "options": options})
+WKEY = "freight_wizard"
 
-# ====== Start (v3) ======
-WIZ_COMMON_KEY = "sales_wiz_common"
-def quotation_wizard_v3_start(request):
-    if request.method == "POST":
-        bt = (request.POST.get("business_type") or "FREIGHT").upper()
-        tm = (request.POST.get("transport_mode") or "SEA").upper()
-        so = (request.POST.get("service_option") or "PORT_TO_PORT").upper()
-        md = True if request.POST.get("multi_destination") in ("on","true","1","True") else False
-        request.session[WIZ_COMMON_KEY] = {"transport_mode": tm, "service_option": so, "multi_destination": md}
-        # Fokus Freight dulu
-        return redirect(reverse("sales:freight_wizard") + "?step=1")
-    return render(request, "sales/quotation_freight_start.html", {})
+def _wiz_get(request):
+    return request.session.get(WKEY, {"step": "header", "header": {}})
 
-# ====== Freight Wizard (Step 1 header -> Step 2 cargos) ======
-WIZ_FREIGHT_HEADER = "sales_wiz_freight_header"
-def freight_wizard(request):
-    step = int(request.GET.get("step","1"))
-    common = request.session.get(WIZ_COMMON_KEY, {"transport_mode":"SEA","service_option":"PORT_TO_PORT","multi_destination":True})
-    show_od_in_header = not common.get("multi_destination", True)
+def _wiz_set(request, data):
+    request.session[WKEY] = data
+    request.session.modified = True
 
-    if step == 1:
+def _wiz_clear(request):
+    if WKEY in request.session:
+        del request.session[WKEY]
+
+@require_http_methods(["GET", "POST"])
+def freight_create_wizard(request):
+    wiz = _wiz_get(request)
+    step = (request.GET.get("step") or wiz.get("step") or "header").lower()
+
+    # Reset state saat GET pertama tanpa parameter step
+    if request.method == "GET" and "step" not in request.GET:
+        _wiz_clear(request)
+        wiz = {"step": "header", "header": {}}
+        _wiz_set(request, wiz)
+        form = FreightHeaderForm()
+        return render(request, "sales/freight/wizard.html", {"step": "header", "form_header": form})
+
+    # STEP: HEADER
+    if step == "header":
         if request.method == "POST":
-            post = request.POST.copy()
-            post["business_type"] = "FREIGHT"
-            qform = QuotationFreightForm(post)
-            if qform.is_valid():
-                data = qform.cleaned_data
-                data["business_type"] = "FREIGHT"
-                data.setdefault("transport_mode", common.get("transport_mode"))
-                data.setdefault("service_option", common.get("service_option"))
-                data.setdefault("multi_destination", common.get("multi_destination"))
-                if data.get("multi_destination"):
-                    data["origin"] = ""
-                    data["destination"] = ""
-                request.session[WIZ_FREIGHT_HEADER] = data
-                request.session.modified = True
-                return redirect(reverse("sales:freight_wizard") + "?step=2")
-            return render(request, "sales/quotation_freight.html", {"step":1,"mode":"FREIGHT","qform":qform,"fs":None,"common":common,"show_od_in_header":show_od_in_header})
+            form = FreightHeaderForm(request.POST)
+            if form.is_valid():
+                cd = form.cleaned_data
+                wiz["header"] = {
+                    "date": cd["date"].isoformat(),
+                    "customer_id": cd["customer"].pk,
+                    "currency": cd["currency"],
+                    "payment_term": cd.get("payment_term") or "",
+                    "notes": cd.get("notes") or "",
+                    "transport_mode": cd["transport_mode"],
+                    "service_option": cd["service_option"],
+                }
+                wiz["step"] = "lines"
+                _wiz_set(request, wiz)
+                return redirect(f"{request.path}?step=lines")
+            messages.error(request, "Periksa Header Information.")
         else:
-            initial = request.session.get(WIZ_FREIGHT_HEADER, {"business_type":"FREIGHT", **common})
-            if initial.get("multi_destination"):
-                initial["origin"] = ""
-                initial["destination"] = ""
-            return render(request, "sales/quotation_freight.html", {"step":1,"mode":"FREIGHT","qform":QuotationFreightForm(initial=initial),"fs":None,"common":common,"show_od_in_header":show_od_in_header})
+            form = FreightHeaderForm()
+        return render(request, "sales/freight/wizard.html", {"step": "header", "form_header": form})
 
-    if step == 2:
-        from django import forms as djforms
-        header = request.session.get(WIZ_FREIGHT_HEADER)
-        if not header:
-            return redirect(reverse("sales:freight_wizard") + "?step=1")
-        multi_dest = bool(header.get("multi_destination"))
+    # Guard: tidak boleh ke lines tanpa header
+    if step == "lines" and not wiz.get("header"):
+        wiz["step"] = "header"
+        _wiz_set(request, wiz)
+        form = FreightHeaderForm()
+        return render(request, "sales/freight/wizard.html", {"step": "header", "form_header": form})
 
-        fs = CargoFormSet(request.POST or None, prefix="cargo")
-        if not multi_dest:
-            for f in fs.forms:
-                if "origin" in f.fields:
-                    f.fields["origin"].widget = djforms.HiddenInput()
-                    if header.get("origin"): f.initial["origin"] = header.get("origin")
-                if "destination" in f.fields:
-                    f.fields["destination"].widget = djforms.HiddenInput()
-                    if header.get("destination"): f.initial["destination"] = header.get("destination")
+    # STEP: LINES
+    if step == "lines":
+        hdr = wiz["header"]
+        CargoFS = CargoFormSet
+        ChargeFS = ChargeFormSet
 
         if request.method == "POST":
-            if request.POST.get("_action") == "back":
-                return redirect(reverse("sales:freight_wizard") + "?step=1")
+            cargo_fs = CargoFS(request.POST, prefix="cargo")
+            charge_fs = ChargeFS(request.POST, prefix="charge")
 
-            def ok(fs):
-                tot=0
-                for f in fs:
-                    if f.cleaned_data.get("DELETE"): continue
-                    if f.cleaned_data.get("description"): tot+=1
-                return tot>0
+            # Filter Location sesuai mode
+            mode = hdr.get("transport_mode", "SEA").upper()
+            if mode == "SEA":
+                loc_types = [Location.SEAPORT, Location.JETTY]
+            elif mode == "AIR":
+                loc_types = [Location.AIRPORT]
+            else:
+                loc_types = [Location.CITY, Location.JETTY]
+            loc_qs = Location.objects.filter(type__in=loc_types).order_by("name")
+            for f in cargo_fs.forms:
+                if "origin" in f.fields:
+                    f.fields["origin"].queryset = loc_qs
+                if "destination" in f.fields:
+                    f.fields["destination"].queryset = loc_qs
 
-            if fs.is_valid() and ok(fs):
-                with transaction.atomic():
-                    qf = QuotationFreightForm(header); qf.is_valid()
-                    q = qf.save(commit=False); q.business_type="FREIGHT"; q.save()
-                    fs.instance = q; fs.save()
-                    if not multi_dest and (header.get("origin") or header.get("destination")):
-                        for c in q.cargos.all():
-                            changed=False
-                            if header.get("origin"): c.origin = header["origin"]; changed=True
-                            if header.get("destination"): c.destination = header["destination"]; changed=True
-                            if changed: c.save(update_fields=["origin","destination"])
-                    request.session.pop(WIZ_FREIGHT_HEADER, None)
-                return redirect("sales:quotation_detail", pk=q.pk)
+            if cargo_fs.is_valid() and charge_fs.is_valid():
+                q = FreightQuotation.objects.create(
+                    date=datetime.date.fromisoformat(hdr["date"]),
+                    customer_id=hdr["customer_id"],
+                    currency=hdr["currency"] or "IDR",
+                    payment_term=hdr.get("payment_term", ""),
+                    transport_mode=hdr["transport_mode"],
+                    service_option=hdr["service_option"],
+                    notes=hdr.get("notes", ""),
+                    multi_destination=False,
+                )
 
-        return render(request, "sales/quotation_freight.html", {
-            "step":2,"mode":"FREIGHT",
-            "qform":QuotationFreightForm(initial=header),
-            "fs":fs,"common":common,"show_od_in_header":not multi_dest
+                cargos_created = 0
+                for f in cargo_fs:
+                    cd = f.cleaned_data or {}
+                    if not cd:
+                        continue
+                    qty = cd.get("qty") or 1
+                    price = cd.get("price") or 0
+                    amount = cd.get("amount")
+                    if amount in (None, "", 0):
+                        amount = qty * price
+                    FreightCargo.objects.create(
+                        quotation=q,
+                        description=cd.get("description"),
+                        qty=qty,
+                        weight_kg=cd.get("weight_kg") or 0,
+                        volume_cbm=cd.get("volume_cbm") or 0,
+                        price=price,
+                        amount=amount,
+                        origin=cd.get("origin"),
+                        destination=cd.get("destination"),
+                    )
+                    cargos_created += 1
+
+                if cargos_created < 1:
+                    q.delete()
+                    messages.error(request, "Minimal satu Cargo wajib diisi.")
+                    return render(request, "sales/freight/wizard.html", {
+                        "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
+                    })
+
+                # Charges opsional: attach ke cargo pertama
+                first_cargo = q.cargos.first()
+                if first_cargo:
+                    for f in charge_fs:
+                        cd = f.cleaned_data or {}
+                        if not cd:
+                            continue
+                        if not (cd.get("description") or cd.get("qty") or cd.get("rate") or cd.get("amount")):
+                            continue
+                        qty = cd.get("qty") or 1
+                        rate = cd.get("rate") or 0
+                        amount = cd.get("amount")
+                        if amount in (None, "", 0):
+                            amount = qty * rate
+                        FreightCharge.objects.create(
+                            cargo=first_cargo,
+                            description=cd.get("description", ""),
+                            qty=qty,
+                            rate=rate,
+                            amount=amount,
+                        )
+
+                # done
+                if 'freight_list' in globals():
+                    pass
+                _wiz_clear(request)
+                messages.success(request, "Freight Quotation berhasil dibuat.")
+                try:
+                    return redirect("sales:freight_list")
+                except Exception:
+                    # kalau belum ada named url, kembali ke list generic
+                    return redirect("/sales/quotations/freight/")
+
+            messages.error(request, "Periksa isian Cargo / Charge.")
+            return render(request, "sales/freight/wizard.html", {
+                "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
+            })
+
+        # GET
+        cargo_fs = CargoFS(prefix="cargo")
+        charge_fs = ChargeFS(prefix="charge")
+        mode = hdr.get("transport_mode", "SEA").upper()
+        if mode == "SEA":
+            loc_types = [Location.SEAPORT, Location.JETTY]
+        elif mode == "AIR":
+            loc_types = [Location.AIRPORT]
+        else:
+            loc_types = [Location.CITY, Location.JETTY]
+        loc_qs = Location.objects.filter(type__in=loc_types).order_by("name")
+        for f in cargo_fs.forms:
+            if "origin" in f.fields:
+                f.fields["origin"].queryset = loc_qs
+            if "destination" in f.fields:
+                f.fields["destination"].queryset = loc_qs
+
+        return render(request, "sales/freight/wizard.html", {
+            "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
         })
 
-    return redirect(reverse("sales:freight_wizard") + "?step=1")
+    # fallback aman
+    wiz["step"] = "header"
+    _wiz_set(request, wiz)
+    form = FreightHeaderForm()
+    return render(request, "sales/freight/wizard.html", {"step": "header", "form_header": form})
 
-# ====== PDF export (tetap) ======
-def quotation_pdf(request, pk, kind="detail"):
-    q = get_object_or_404(Quotation.objects.select_related("customer"), pk=pk)
-    if q.business_type == "FREIGHT":
-        q = (Quotation.objects.filter(pk=pk).select_related("customer").prefetch_related("cargos__charges").first())
+def freight_view(request, pk):
+    q = get_object_or_404(FreightQuotation, pk=pk)
+    return render(request, "sales/freight/view.html", {"q": q})
+
+def freight_edit(request, pk):
+    q = get_object_or_404(FreightQuotation, pk=pk)
+    if request.method == "POST":
+        form = FreightHeaderForm(request.POST, instance=q)
+        if form.is_valid():
+            cd = form.cleaned_data
+            # update field yang ada di header
+            q.date = cd["date"]
+            q.customer = cd["customer"]
+            q.currency = cd.get("currency") or q.currency
+            q.payment_term = cd.get("payment_term") or ""
+            q.transport_mode = cd["transport_mode"]
+            q.service_option = cd["service_option"]
+            q.notes = cd.get("notes") or ""
+            q.save()
+            messages.success(request, "Quotation updated.")
+            return redirect("sales:freight_view", pk=q.pk)
     else:
-        q = (Quotation.objects.filter(pk=pk).select_related("customer").prefetch_related("legs","charter_charges").first())
+        form = FreightHeaderForm(instance=q)
 
-    cargo_totals = []
-    grand_total = 0
-    for c in getattr(q, "cargos", []).all() if hasattr(q, "cargos") else []:
-        tot = c.charges.aggregate(s=Sum("amount")).get("s") or 0
-        cargo_totals.append((c, tot))
-        grand_total += tot
-
-    context = {"q": q, "cargo_totals": cargo_totals, "grand_total": grand_total}
-    template = "sales/quotation_pdf_detail.html" if kind.lower() == "detail" else "sales/quotation_pdf_summary.html"
-    html = render_to_string(template, context)
-
-    try:
-        from weasyprint import HTML
-        response = HttpResponse(content_type="application/pdf")
-        response["Content-Disposition"] = f'inline; filename="{q.number}-{kind}.pdf"'
-        HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf(response)
-        return response
-    except Exception:
-        return HttpResponse(html)
+    return render(request, "sales/freight/edit.html", {"form": form, "q": q})

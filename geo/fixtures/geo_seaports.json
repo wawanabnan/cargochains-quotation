@@ -1,0 +1,302 @@
+[
+  {
+    "model": "geo.location",
+    "pk": 195,
+    "fields": {
+      "name": "Tanjung Priok",
+      "code": "IDTPP",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 196,
+    "fields": {
+      "name": "Tanjung Perak",
+      "code": "IDSUB",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 197,
+    "fields": {
+      "name": "Belawan",
+      "code": "IDBLW",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 198,
+    "fields": {
+      "name": "Makassar (Soekarno-Hatta Port)",
+      "code": "IDMAK",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 199,
+    "fields": {
+      "name": "Bitung",
+      "code": "IDBIT",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 200,
+    "fields": {
+      "name": "Balikpapan",
+      "code": "IDBPNP",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 201,
+    "fields": {
+      "name": "Samarinda",
+      "code": "IDSRI-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 202,
+    "fields": {
+      "name": "Banjarmasin (Trisakti)",
+      "code": "IDTPI",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 203,
+    "fields": {
+      "name": "Pontianak",
+      "code": "IDPNK-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 204,
+    "fields": {
+      "name": "Batu Ampar (Batam)",
+      "code": "IDBTAM",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 205,
+    "fields": {
+      "name": "Tanjung Uban",
+      "code": "IDTUB",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 206,
+    "fields": {
+      "name": "Tanjung Balai Karimun",
+      "code": "IDTBK",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 207,
+    "fields": {
+      "name": "Tanjung Pandan",
+      "code": "IDTJQ-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 208,
+    "fields": {
+      "name": "Panjang (Lampung)",
+      "code": "IDPNJ",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 209,
+    "fields": {
+      "name": "Palembang (Boom Baru)",
+      "code": "IDPLMB",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 210,
+    "fields": {
+      "name": "Bengkulu (Pulau Baai)",
+      "code": "IDBKS-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 211,
+    "fields": {
+      "name": "Panarukan",
+      "code": "IDPAU",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 212,
+    "fields": {
+      "name": "Banyuwangi (Tanjung Wangi)",
+      "code": "IDBWI-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 213,
+    "fields": {
+      "name": "Kupang (Tenau)",
+      "code": "IDKOE-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 214,
+    "fields": {
+      "name": "Maumere",
+      "code": "IDMOF-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 215,
+    "fields": {
+      "name": "Ambon (Yos Sudarso)",
+      "code": "IDAMQ-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 216,
+    "fields": {
+      "name": "Ternate",
+      "code": "IDTTE-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 217,
+    "fields": {
+      "name": "Jayapura",
+      "code": "IDDJJ-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 218,
+    "fields": {
+      "name": "Sorong",
+      "code": "IDSOQ-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 219,
+    "fields": {
+      "name": "Merauke",
+      "code": "IDMKQ-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 220,
+    "fields": {
+      "name": "Tarakan",
+      "code": "IDTRK-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 221,
+    "fields": {
+      "name": "Nunukan",
+      "code": "IDNUN",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 222,
+    "fields": {
+      "name": "Kendari",
+      "code": "IDKDI-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 223,
+    "fields": {
+      "name": "Parepare",
+      "code": "IDPRE-P",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 224,
+    "fields": {
+      "name": "Kuala Tanjung",
+      "code": "IDKTJ",
+      "country": "ID",
+      "type": "SEAPORT"
+    }
+  }
+]

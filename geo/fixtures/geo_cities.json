@@ -1,0 +1,1942 @@
+[
+  {
+    "model": "geo.location",
+    "pk": 1,
+    "fields": {
+      "name": "Jakarta",
+      "code": "IDJAK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 2,
+    "fields": {
+      "name": "Bogor",
+      "code": "IDBOG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 3,
+    "fields": {
+      "name": "Depok",
+      "code": "IDDEP",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 4,
+    "fields": {
+      "name": "Bekasi",
+      "code": "IDBEK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 5,
+    "fields": {
+      "name": "Tangerang",
+      "code": "IDTAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 6,
+    "fields": {
+      "name": "South Tangerang",
+      "code": "IDSOUT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 7,
+    "fields": {
+      "name": "Serang",
+      "code": "IDSER",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 8,
+    "fields": {
+      "name": "Cilegon",
+      "code": "IDCIL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 9,
+    "fields": {
+      "name": "Bandung",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 10,
+    "fields": {
+      "name": "Cimahi",
+      "code": "IDCIM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 11,
+    "fields": {
+      "name": "Cirebon",
+      "code": "IDCIR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 12,
+    "fields": {
+      "name": "Tasikmalaya",
+      "code": "IDTAS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 13,
+    "fields": {
+      "name": "Garut",
+      "code": "IDGAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 14,
+    "fields": {
+      "name": "Sumedang",
+      "code": "IDSUM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 15,
+    "fields": {
+      "name": "Subang",
+      "code": "IDSUB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 16,
+    "fields": {
+      "name": "Purwakarta",
+      "code": "IDPUR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 17,
+    "fields": {
+      "name": "Sukabumi",
+      "code": "IDSUK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 18,
+    "fields": {
+      "name": "Karawang",
+      "code": "IDKAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 19,
+    "fields": {
+      "name": "Indramayu",
+      "code": "IDIND",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 20,
+    "fields": {
+      "name": "Kuningan",
+      "code": "IDKUN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 21,
+    "fields": {
+      "name": "Semarang",
+      "code": "IDSEM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 22,
+    "fields": {
+      "name": "Magelang",
+      "code": "IDMAG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 23,
+    "fields": {
+      "name": "Salatiga",
+      "code": "IDSAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 24,
+    "fields": {
+      "name": "Surakarta (Solo)",
+      "code": "IDSURS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 25,
+    "fields": {
+      "name": "Tegal",
+      "code": "IDTEG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 26,
+    "fields": {
+      "name": "Pekalongan",
+      "code": "IDPEK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 27,
+    "fields": {
+      "name": "Purwokerto",
+      "code": "IDPUR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 28,
+    "fields": {
+      "name": "Cilacap",
+      "code": "IDCIL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 29,
+    "fields": {
+      "name": "Kebumen",
+      "code": "IDKEB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 30,
+    "fields": {
+      "name": "Banyumas",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 31,
+    "fields": {
+      "name": "Kudus",
+      "code": "IDKUD",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 32,
+    "fields": {
+      "name": "Jepara",
+      "code": "IDJEP",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 33,
+    "fields": {
+      "name": "Pati",
+      "code": "IDPAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 34,
+    "fields": {
+      "name": "Rembang",
+      "code": "IDREM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 35,
+    "fields": {
+      "name": "Blora",
+      "code": "IDBLO",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 36,
+    "fields": {
+      "name": "Demak",
+      "code": "IDDEM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 37,
+    "fields": {
+      "name": "Kendal",
+      "code": "IDKEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 38,
+    "fields": {
+      "name": "Batang",
+      "code": "IDBAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 39,
+    "fields": {
+      "name": "Wonosobo",
+      "code": "IDWON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 40,
+    "fields": {
+      "name": "Temanggung",
+      "code": "IDTEM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 41,
+    "fields": {
+      "name": "Yogyakarta",
+      "code": "IDYOG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 42,
+    "fields": {
+      "name": "Sleman",
+      "code": "IDSLE",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 43,
+    "fields": {
+      "name": "Bantul",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 44,
+    "fields": {
+      "name": "Kulon Progo",
+      "code": "IDKULP",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 45,
+    "fields": {
+      "name": "Gunungkidul",
+      "code": "IDGUN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 46,
+    "fields": {
+      "name": "Surabaya",
+      "code": "IDSUR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 47,
+    "fields": {
+      "name": "Sidoarjo",
+      "code": "IDSID",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 48,
+    "fields": {
+      "name": "Gresik",
+      "code": "IDGRE",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 49,
+    "fields": {
+      "name": "Mojokerto",
+      "code": "IDMOJ",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 50,
+    "fields": {
+      "name": "Malang",
+      "code": "IDMAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 51,
+    "fields": {
+      "name": "Batu",
+      "code": "IDBAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 52,
+    "fields": {
+      "name": "Pasuruan",
+      "code": "IDPAS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 53,
+    "fields": {
+      "name": "Probolinggo",
+      "code": "IDPRO",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 54,
+    "fields": {
+      "name": "Lumajang",
+      "code": "IDLUM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 55,
+    "fields": {
+      "name": "Jember",
+      "code": "IDJEM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 56,
+    "fields": {
+      "name": "Bondowoso",
+      "code": "IDBON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 57,
+    "fields": {
+      "name": "Situbondo",
+      "code": "IDSIT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 58,
+    "fields": {
+      "name": "Banyuwangi",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 59,
+    "fields": {
+      "name": "Madiun",
+      "code": "IDMAD",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 60,
+    "fields": {
+      "name": "Magetan",
+      "code": "IDMAG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 61,
+    "fields": {
+      "name": "Ngawi",
+      "code": "IDNGA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 62,
+    "fields": {
+      "name": "Pacitan",
+      "code": "IDPAC",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 63,
+    "fields": {
+      "name": "Trenggalek",
+      "code": "IDTRE",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 64,
+    "fields": {
+      "name": "Tulungagung",
+      "code": "IDTUL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 65,
+    "fields": {
+      "name": "Blitar",
+      "code": "IDBLI",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 66,
+    "fields": {
+      "name": "Kediri",
+      "code": "IDKED",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 67,
+    "fields": {
+      "name": "Nganjuk",
+      "code": "IDNGA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 68,
+    "fields": {
+      "name": "Jombang",
+      "code": "IDJOM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 69,
+    "fields": {
+      "name": "Lamongan",
+      "code": "IDLAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 70,
+    "fields": {
+      "name": "Bojonegoro",
+      "code": "IDBOJ",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 71,
+    "fields": {
+      "name": "Tuban",
+      "code": "IDTUB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 72,
+    "fields": {
+      "name": "Denpasar",
+      "code": "IDDEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 73,
+    "fields": {
+      "name": "Badung",
+      "code": "IDBAD",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 74,
+    "fields": {
+      "name": "Tabanan",
+      "code": "IDTAB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 75,
+    "fields": {
+      "name": "Gianyar",
+      "code": "IDGIA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 76,
+    "fields": {
+      "name": "Bangli",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 77,
+    "fields": {
+      "name": "Klungkung",
+      "code": "IDKLU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 78,
+    "fields": {
+      "name": "Karangasem",
+      "code": "IDKAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 79,
+    "fields": {
+      "name": "Buleleng",
+      "code": "IDBUL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 80,
+    "fields": {
+      "name": "Mataram",
+      "code": "IDMAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 81,
+    "fields": {
+      "name": "Bima",
+      "code": "IDBIM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 82,
+    "fields": {
+      "name": "Kupang",
+      "code": "IDKUP",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 83,
+    "fields": {
+      "name": "Maumere",
+      "code": "IDMAU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 84,
+    "fields": {
+      "name": "Ende",
+      "code": "IDEND",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 85,
+    "fields": {
+      "name": "Waingapu",
+      "code": "IDWAI",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 86,
+    "fields": {
+      "name": "Labuan Bajo",
+      "code": "IDLABB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 87,
+    "fields": {
+      "name": "Atambua",
+      "code": "IDATA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 88,
+    "fields": {
+      "name": "Pontianak",
+      "code": "IDPON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 89,
+    "fields": {
+      "name": "Singkawang",
+      "code": "IDSIN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 90,
+    "fields": {
+      "name": "Ketapang",
+      "code": "IDKET",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 91,
+    "fields": {
+      "name": "Sambas",
+      "code": "IDSAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 92,
+    "fields": {
+      "name": "Sanggau",
+      "code": "IDSAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 93,
+    "fields": {
+      "name": "Sekadau",
+      "code": "IDSEK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 94,
+    "fields": {
+      "name": "Melawi",
+      "code": "IDMEL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 95,
+    "fields": {
+      "name": "Kapuas Hulu",
+      "code": "IDKAPH",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 96,
+    "fields": {
+      "name": "Palangkaraya",
+      "code": "IDPAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 97,
+    "fields": {
+      "name": "Sampit",
+      "code": "IDSAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 98,
+    "fields": {
+      "name": "Pangkalan Bun",
+      "code": "IDPANB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 99,
+    "fields": {
+      "name": "Muara Teweh",
+      "code": "IDMUAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 100,
+    "fields": {
+      "name": "Buntok",
+      "code": "IDBUN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 101,
+    "fields": {
+      "name": "Kuala Kapuas",
+      "code": "IDKUAK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 102,
+    "fields": {
+      "name": "Banjarmasin",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 103,
+    "fields": {
+      "name": "Banjarbaru",
+      "code": "IDBAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 104,
+    "fields": {
+      "name": "Martapura",
+      "code": "IDMAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 105,
+    "fields": {
+      "name": "Pelaihari",
+      "code": "IDPEL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 106,
+    "fields": {
+      "name": "Kandangan",
+      "code": "IDKAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 107,
+    "fields": {
+      "name": "Kotabaru",
+      "code": "IDKOT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 108,
+    "fields": {
+      "name": "Barabai",
+      "code": "IDBAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 109,
+    "fields": {
+      "name": "Amuntai",
+      "code": "IDAMU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 110,
+    "fields": {
+      "name": "Tanjung (Tabalong)",
+      "code": "IDTANT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 111,
+    "fields": {
+      "name": "Samarinda",
+      "code": "IDSAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 112,
+    "fields": {
+      "name": "Balikpapan",
+      "code": "IDBAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 113,
+    "fields": {
+      "name": "Bontang",
+      "code": "IDBON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 114,
+    "fields": {
+      "name": "Tenggarong",
+      "code": "IDTEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 115,
+    "fields": {
+      "name": "Sangatta",
+      "code": "IDSAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 116,
+    "fields": {
+      "name": "Penajam",
+      "code": "IDPEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 117,
+    "fields": {
+      "name": "Berau (Tanjung Redeb)",
+      "code": "IDBERT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 118,
+    "fields": {
+      "name": "Tarakan",
+      "code": "IDTAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 119,
+    "fields": {
+      "name": "Tana Tidung",
+      "code": "IDTANT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 120,
+    "fields": {
+      "name": "Nunukan",
+      "code": "IDNUN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 121,
+    "fields": {
+      "name": "Makassar",
+      "code": "IDMAK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 122,
+    "fields": {
+      "name": "Parepare",
+      "code": "IDPAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 123,
+    "fields": {
+      "name": "Palopo",
+      "code": "IDPAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 124,
+    "fields": {
+      "name": "Bulukumba",
+      "code": "IDBUL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 125,
+    "fields": {
+      "name": "Bone (Watampone)",
+      "code": "IDBONW",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 126,
+    "fields": {
+      "name": "Sungguminasa (Gowa)",
+      "code": "IDSUNG",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 127,
+    "fields": {
+      "name": "Maros",
+      "code": "IDMAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 128,
+    "fields": {
+      "name": "Pangkajene",
+      "code": "IDPAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 129,
+    "fields": {
+      "name": "Enrekang",
+      "code": "IDENR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 130,
+    "fields": {
+      "name": "Manado",
+      "code": "IDMAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 131,
+    "fields": {
+      "name": "Bitung",
+      "code": "IDBIT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 132,
+    "fields": {
+      "name": "Tomohon",
+      "code": "IDTOM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 133,
+    "fields": {
+      "name": "Amurang",
+      "code": "IDAMU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 134,
+    "fields": {
+      "name": "Tondano",
+      "code": "IDTON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 135,
+    "fields": {
+      "name": "Kotamobagu",
+      "code": "IDKOT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 136,
+    "fields": {
+      "name": "Gorontalo",
+      "code": "IDGOR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 137,
+    "fields": {
+      "name": "Limboto",
+      "code": "IDLIM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 138,
+    "fields": {
+      "name": "Boalemo",
+      "code": "IDBOA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 139,
+    "fields": {
+      "name": "Marisa",
+      "code": "IDMAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 140,
+    "fields": {
+      "name": "Palu",
+      "code": "IDPAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 141,
+    "fields": {
+      "name": "Donggala",
+      "code": "IDDON",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 142,
+    "fields": {
+      "name": "Poso",
+      "code": "IDPOS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 143,
+    "fields": {
+      "name": "Toli-Toli",
+      "code": "IDTOL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 144,
+    "fields": {
+      "name": "Parigi",
+      "code": "IDPAR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 145,
+    "fields": {
+      "name": "Morowali",
+      "code": "IDMOR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 146,
+    "fields": {
+      "name": "Banggai (Luwuk)",
+      "code": "IDBANL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 147,
+    "fields": {
+      "name": "Kendari",
+      "code": "IDKEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 148,
+    "fields": {
+      "name": "Baubau",
+      "code": "IDBAU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 149,
+    "fields": {
+      "name": "Kolaka",
+      "code": "IDKOL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 150,
+    "fields": {
+      "name": "Unaaha",
+      "code": "IDUNA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 151,
+    "fields": {
+      "name": "Andoolo",
+      "code": "IDAND",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 152,
+    "fields": {
+      "name": "Raha",
+      "code": "IDRAH",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 153,
+    "fields": {
+      "name": "Wanggudu",
+      "code": "IDWAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 154,
+    "fields": {
+      "name": "Ambon",
+      "code": "IDAMB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 155,
+    "fields": {
+      "name": "Tual",
+      "code": "IDTUA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 156,
+    "fields": {
+      "name": "Masohi",
+      "code": "IDMAS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 157,
+    "fields": {
+      "name": "Saumlaki",
+      "code": "IDSAU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 158,
+    "fields": {
+      "name": "Namlea",
+      "code": "IDNAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 159,
+    "fields": {
+      "name": "Bula",
+      "code": "IDBUL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 160,
+    "fields": {
+      "name": "Ternate",
+      "code": "IDTER",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 161,
+    "fields": {
+      "name": "Tidore",
+      "code": "IDTID",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 162,
+    "fields": {
+      "name": "Sofifi",
+      "code": "IDSOF",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 163,
+    "fields": {
+      "name": "Labuha",
+      "code": "IDLAB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 164,
+    "fields": {
+      "name": "Jayapura",
+      "code": "IDJAY",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 165,
+    "fields": {
+      "name": "Sentani",
+      "code": "IDSEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 166,
+    "fields": {
+      "name": "Merauke",
+      "code": "IDMER",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 167,
+    "fields": {
+      "name": "Timika",
+      "code": "IDTIM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 168,
+    "fields": {
+      "name": "Nabire",
+      "code": "IDNAB",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 169,
+    "fields": {
+      "name": "Biak",
+      "code": "IDBIA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 170,
+    "fields": {
+      "name": "Manokwari",
+      "code": "IDMAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 171,
+    "fields": {
+      "name": "Sorong",
+      "code": "IDSOR",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 172,
+    "fields": {
+      "name": "Fakfak",
+      "code": "IDFAK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 173,
+    "fields": {
+      "name": "Kaimana",
+      "code": "IDKAI",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 174,
+    "fields": {
+      "name": "Wamena",
+      "code": "IDWAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 175,
+    "fields": {
+      "name": "Padang",
+      "code": "IDPAD",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 176,
+    "fields": {
+      "name": "Bukittinggi",
+      "code": "IDBUK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 177,
+    "fields": {
+      "name": "Pekanbaru",
+      "code": "IDPEK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 178,
+    "fields": {
+      "name": "Dumai",
+      "code": "IDDUM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 179,
+    "fields": {
+      "name": "Jambi",
+      "code": "IDJAM",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 180,
+    "fields": {
+      "name": "Palembang",
+      "code": "IDPAL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 181,
+    "fields": {
+      "name": "Bengkulu",
+      "code": "IDBEN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 182,
+    "fields": {
+      "name": "Bandar Lampung",
+      "code": "IDBANL",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 183,
+    "fields": {
+      "name": "Pangkalpinang",
+      "code": "IDPAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 184,
+    "fields": {
+      "name": "Tanjung Pinang",
+      "code": "IDTANP",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 185,
+    "fields": {
+      "name": "Batam",
+      "code": "IDBAT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 186,
+    "fields": {
+      "name": "Medan",
+      "code": "IDMED",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 187,
+    "fields": {
+      "name": "Binjai",
+      "code": "IDBIN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 188,
+    "fields": {
+      "name": "Pematang Siantar",
+      "code": "IDPEMS",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 189,
+    "fields": {
+      "name": "Tebing Tinggi",
+      "code": "IDTEBT",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 190,
+    "fields": {
+      "name": "Banda Aceh",
+      "code": "IDBANA",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 191,
+    "fields": {
+      "name": "Lhokseumawe",
+      "code": "IDLHO",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 192,
+    "fields": {
+      "name": "Langsa",
+      "code": "IDLAN",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 193,
+    "fields": {
+      "name": "Meulaboh",
+      "code": "IDMEU",
+      "country": "ID",
+      "type": "CITY"
+    }
+  },
+  {
+    "model": "geo.location",
+    "pk": 194,
+    "fields": {
+      "name": "Takengon",
+      "code": "IDTAK",
+      "country": "ID",
+      "type": "CITY"
+    }
+  }
+]

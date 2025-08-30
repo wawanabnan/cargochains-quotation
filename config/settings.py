@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'partners',
     'sales',
+    'geo',
 ]
 
 MIDDLEWARE = [
