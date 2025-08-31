@@ -47,12 +47,8 @@ class FreightHeaderForm(forms.ModelForm):
         initial="SEA",
         widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
     )
-    service_option = forms.ChoiceField(
-        label="Service Option",
-        choices=SERVICE_CHOICES_UNION,
-        initial="DOOR_TO_DOOR",
-        widget=forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"})
-    )
+    
+
     currency = forms.ChoiceField(
         label="Currency",
         choices=CURRENCY_CHOICES,
@@ -68,8 +64,9 @@ class FreightHeaderForm(forms.ModelForm):
 
     class Meta:
         model = FreightQuotation
-        fields = ["date", "customer", "currency", "payment_term", "notes"]
+        fields = ["date", "customer", "currency", "payment_term", "service_option","notes"]
         widgets = {
+            "service_option": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "customer": forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"}),
             "notes": forms.Textarea(attrs={"class": "form-control form-control-sm", "rows": 2}),
         }

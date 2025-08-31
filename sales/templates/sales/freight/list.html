@@ -1,49 +1,144 @@
 {% extends "base.html" %}
 {% block title %}Freight Quotations{% endblock %}
+
+{% block extra_css %}
+<style>
+#fq-table { --bs-table-hover-bg: #f8f9fa; }
+#fq-table tbody tr.row-link.active > * { background-color: #d1ecf1 !important; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h5 class="mb-0">Freight Quotations</h5>
-  <a href="{% url 'sales:freight_new' %}" class="btn btn-primary btn-sm rounded-0">Create New</a>
+  <a href="{% url 'sales:freight_new' %}" class="btn btn-primary btn-sm rounded-0">
+    <i class="fa fa-plus"></i> Create New
+  </a>
 </div>
+
+{# ========= FILTER BAR ========= #}
+<form class="card shadow-sm border-0 mb-3" method="get" id="filter-form">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-md-2">
+        <input type="text" name="number" value="{{ filters.number }}" class="form-control form-control-sm" placeholder="Number">
+      </div>
+
+      {# Customer dropdown #}
+      <div class="col-md-3">
+       
+        <select name="customer_id" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Customer">
+          <option value="">All Customers</option>
+          {% for cid, clabel in customer_options %}
+            <option value="{{ cid }}" {% if filters.customer_id == cid|stringformat:"s" %}selected{% endif %}>
+              {{ clabel }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {# Mode → All Freight #}
+      <div class="col-md-2">
+        <select name="mode" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Freight Mode">
+          <option value="">All Freight</option>
+          <option value="SEA"  {% if filters.mode == "SEA" %}selected{% endif %}>Sea</option>
+          <option value="AIR"  {% if filters.mode == "AIR" %}selected{% endif %}>Air</option>
+          <option value="LAND" {% if filters.mode == "LAND" %}selected{% endif %}>Land</option>
+        </select>
+      </div>
+
+      {# Service dropdown #}
+      <div class="col-md-2">
+        <select name="service" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Service">
+          <option value="">All Services</option>
+             {% for code, label in service_choices %}
+              <option value="{{ code }}" {% if filters.service == code %}selected{% endif %}>{{ label }}</option>
+             {% endfor %}
+
+        </select>
+        
+      </div>
+
+      <div class="col-md-1">
+        <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm" data-bs-toggle="tooltip" title="Start date">
+      </div>
+      <div class="col-md-1">
+        <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm" data-bs-toggle="tooltip" title="End date">
+      </div>
+      <div class="col-md-1 text-end">
+        <button class="btn btn-outline-secondary btn-sm rounded-0 w-100" data-bs-toggle="tooltip" title="Apply filters">
+          <i class="fa fa-filter"></i> Filter
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+{# ========= BULK ACTIONS ========= #}
+<div class="d-flex gap-2 mb-2">
+  <form id="bulk-form" method="post" action="{% url 'sales:freight_bulk_action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="ids" id="bulk-ids">
+    <input type="hidden" name="action" id="bulk-action">
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" class="btn btn-outline-primary rounded-0" data-action="email" data-bs-toggle="tooltip" title="Send selected quotations via email (dummy)">
+        <i class="fa fa-paper-plane"></i> 
+      </button>
+      <button type="button" class="btn btn-outline-info rounded-0" data-action="manage_charges" data-bs-toggle="tooltip" title="Open Manage Charges for the first selected">
+        <i class="fa fa-coins"></i> 
+      </button>
+      <button type="button" class="btn btn-outline-danger rounded-0" data-action="delete" data-bs-toggle="tooltip" title="Delete selected quotations">
+        <i class="fa fa-trash"></i> 
+      </button>
+    </div>
+  </form>
+</div>
+
 <div class="card shadow-sm border-0">
   <div class="table-responsive">
-    <table class="table table-sm align-middle mb-0" id="fq-table">
+    <table class="table table-sm align-middle mb-0 table-hover" id="fq-table">
       <thead class="table-light">
         <tr>
-          <th style="width:36px;">
-            <input type="checkbox" id="chk-all" class="form-check-input">
-          </th>
-          <th style="width:80px;">#ID</th>
-          <th style="width:140px;">Number</th>
-          <th style="width:120px;">Date</th>
+          <th style="width:36px;"><input type="checkbox" id="chk-all" class="form-check-input"></th>
+          <th style="width:120px">Number</th>
+          <th style="width:120px">Date</th>
           <th>Customer</th>
           <th style="width:110px;">Currency</th>
-          <th style="width:110px;">Mode</th>
-          <th style="width:160px;">Service</th>
+          <th style="width:110px;">Freight Types
+          <th style="width:120px;">Service</th>
           <th style="width:120px;" class="text-end">Cargo Lines</th>
-          <th style="width:110px;"></th>
+          <th style="width:8px;">Status</th>
+          
         </tr>
       </thead>
       <tbody>
         {% for q in quotations %}
         <tr class="row-link" data-href="{% url 'sales:freight_view' q.id %}">
-          <td>
-            <input type="checkbox" class="row-check form-check-input" value="{{ q.id }}">
-          </td>
-          <td>{{ q.id }}</td>
+          <td><input type="checkbox" class="row-check form-check-input" value="{{ q.id }}"></td>
           <td>{{ q.number }}</td>
           <td>{{ q.date }}</td>
           <td>{{ q.customer }}</td>
           <td>{{ q.currency }}</td>
           <td>{{ q.transport_mode }}</td>
-          <td>{{ q.service_option }}</td>
+         <td>{{ q.get_service_option_display }}</td>
           <td class="text-end">{{ q.cargos.count }}</td>
-          <td class="text-end">
-            <a href="{% url 'sales:freight_view' q.id %}" class="btn btn-outline-secondary btn-sm rounded-0">View</a>
+          <td>
+            {% if q.status == "CLOSED" %}
+              <span class="badge text-bg-secondary">Closed</span>
+            {% elif q.status == "CONFIRMED" %}
+              <span class="badge text-bg-success">Confirmed</span>
+            {% elif q.status == "SENT" %}
+              <span class="badge text-bg-info">Sent</span>
+            {% elif q.status == "CANCELLED" %}
+              <span class="badge text-bg-light">Cancelled</span>
+            {% else %}
+              <span class="badge text-bg-primary ">Draft</span>
+            {% endif %}
           </td>
+         
         </tr>
         {% empty %}
-        <tr><td colspan="10" class="text-center text-muted py-4">No quotations found.</td></tr>
+        <tr><td colspan="11" class="text-center text-muted py-4">No quotations found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -55,26 +150,54 @@
 <script>
 (function(){
   const table = document.getElementById('fq-table');
-  if(!table) return;
+  if (!table) return;
 
-  // Select all checkbox
+  // checklist
   const chkAll = document.getElementById('chk-all');
-  if(chkAll){
+  if (chkAll) {
     chkAll.addEventListener('change', function(){
-      table.querySelectorAll('tbody .row-check').forEach(ch => { ch.checked = chkAll.checked; });
+      table.querySelectorAll('tbody .row-check').forEach(ch => ch.checked = chkAll.checked);
     });
   }
+  table.querySelectorAll('tbody input.row-check').forEach(ch => {
+    ch.addEventListener('click', e => e.stopPropagation());
+    ch.addEventListener('mousedown', e => e.stopPropagation());
+  });
 
-  // Row click navigation, kecuali klik pada elemen interaktif
+  // row click
+  function clearActive(){
+    table.querySelectorAll('tbody tr.row-link').forEach(tr => tr.classList.remove('active'));
+  }
   table.querySelectorAll('tbody tr.row-link').forEach(tr => {
     tr.addEventListener('click', function(e){
-      const target = e.target;
-      // Jangan navigate jika klik pada elemen berikut
-      if (target.closest('a, button, input, label, select, textarea')) {
-        return;
-      }
-      const href = tr.getAttribute('data-href');
-      if(href){ window.location = href; }
+      if (e.target.closest('a, button, input, label, select, textarea')) return;
+      clearActive();
+      tr.classList.add('active');
+      const href = tr.dataset.href;
+      if (href) window.location = href;
+    });
+  });
+
+  // bulk actions
+  const bulkForm = document.getElementById('bulk-form');
+  const idsInput = document.getElementById('bulk-ids');
+  const actInput = document.getElementById('bulk-action');
+
+  function selectedIds(){
+    const ids = [];
+    table.querySelectorAll('tbody .row-check:checked').forEach(ch => ids.push(ch.value));
+    return ids;
+  }
+
+  bulkForm.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const ids = selectedIds();
+      if (!ids.length) { alert('Pilih minimal satu quotation.'); return; }
+      if (this.dataset.action === 'delete' && !confirm('Hapus quotation terpilih?')) return;
+
+      idsInput.value = ids.join(',');
+      actInput.value = this.dataset.action;
+      bulkForm.submit();
     });
   });
 })();

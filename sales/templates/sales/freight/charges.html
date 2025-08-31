@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Manage Charges - {{ q.number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* sidebar cargo */
+.cc-cargo-list .list-group-item { font-size: .92rem; }
+/* borderless inputs di tabel */
+.table .form-control { border: 0; background: transparent; box-shadow: none; padding-left: 0; padding-right: 0; }
+.table .form-control:focus { background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+/* angka rata kanan */
+.text-end .form-control { text-align: right; }
+/* perbaiki tinggi sel */
+.table td, .table th { vertical-align: middle; }
+/* action bar kanan bawah */
+.cc-actions { position: sticky; bottom: 0; background: #fff; padding-top: .5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Charges for {{ q.number }}</h5>
+  <a class="btn btn-outline-secondary btn-sm rounded-0" href="{% url 'sales:freight_view' q.id %}">Back to View</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-3">
+    <div class="cc-cargo-list list-group">
+      {% for c in cargos %}
+        <a class="list-group-item list-group-item-action {% if c.id == current.id %}active{% endif %}"
+           href="?cargo={{ c.id }}">
+          Cargo #{{ forloop.counter }} — {{ c.description|default:"(no desc)" }}
+        </a>
+      {% empty %}
+        <div class="text-muted">No cargo.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="card shadow-sm border-0">
+      <div class="card-header py-2">
+        <strong>Charges — {{ current.description|default:"(no desc)" }}</strong>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ formset.management_form }}
+
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <colgroup>
+                <col style="width:44%">
+                <col style="width:12%">
+                <col style="width:18%">
+                <col style="width:18%">
+                <col style="width:8%">
+              </colgroup>
+              <thead class="table-light">
+                <tr>
+                  <th>Description</th>
+                  <th class="text-end">Qty</th>
+                  <th class="text-end">Rate</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-center">Del</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for f in formset %}
+                <tr>
+                  <td>{{ f.description }}</td>
+                  <td class="text-end">{{ f.qty }}</td>
+                  <td class="text-end">{{ f.rate }}</td>
+                  <td class="text-end">{{ f.amount }}</td>
+                  <td class="text-center">{{ f.DELETE }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between cc-actions">
+            <div class="text-muted small">
+              Cargo: {{ current.description|default:"(no desc)" }}
+            </div>
+            <button class="btn btn-primary rounded-0">Save Charges</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// auto-calc amount = qty * rate
+document.addEventListener('input', function(e){
+  const row = e.target.closest('tr');
+  if(!row) return;
+  const qty  = row.querySelector("input[name$='-qty']");
+  const rate = row.querySelector("input[name$='-rate']");
+  const amt  = row.querySelector("input[name$='-amount']");
+  if(qty && rate && amt){
+    const q = parseFloat(qty.value||'1'), r = parseFloat(rate.value||'0');
+    if(!isNaN(q) && !isNaN(r)) amt.value = (q*r).toFixed(2);
+  }
+});
+</script>
+{% endblock %}

@@ -11,13 +11,31 @@ from decimal import Decimal
 class FreightQuotation(models.Model):
     BUSINESS_TYPE = "FREIGHT"
 
+    STATUS_CHOICES = [
+        ("DRAFT", "Draft"),
+        ("SENT", "Sent"),
+        ("CONFIRMED", "Confirmed"),
+        ("CLOSED", "Closed"),
+        ("CANCELLED", "Cancelled"),
+    ]
+
+    SERVICE_CHOICES = [
+        ("DOOR_TO_DOOR", "Door to door"),
+        ("DOOR_TO_PORT", "Door to port"),
+        ("PORT_TO_PORT", "Port to port"),
+        ("DOOR_TO_AIRPORT", "Door to airport"),
+        ("AIRPORT_TO_AIRPORT", "Airport to airport"),
+        ("TRUCKING", "Trucking"),
+    ]
+   
+
     number = models.CharField(max_length=50, unique=True, blank=True)
     date = models.DateField()
     # TODO: Ganti ke model Customer/Partner Anda jika ada (mis. partners.Partner)
     customer = models.ForeignKey(Partner, on_delete=models.PROTECT)
     currency = models.CharField(max_length=10, default="IDR")
     transport_mode = models.CharField(max_length=20, choices=[("SEA","Sea"),("AIR","Air"),("LAND","Land")])
-    service_option = models.CharField(max_length=50)
+    service_option = models.CharField(max_length=50, choices=SERVICE_CHOICES)
     notes = models.TextField(blank=True)
 
     # single-destination: isi di header; multi: kosong & isi per cargo
@@ -28,7 +46,8 @@ class FreightQuotation(models.Model):
 
     vat = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
     total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
- 
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="DRAFT")  # << NEW
+
 
     created_at = models.DateTimeField(default=timezone.now)  # ganti auto_now_add
     updated_at = models.DateTimeField(default=timezone.now)  # ganti auto_now
