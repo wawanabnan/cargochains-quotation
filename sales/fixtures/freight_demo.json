@@ -1,0 +1,606 @@
+[
+  {
+    "model": "sales.freightquotation",
+    "pk": 1,
+    "fields": {
+      "number": "QFR-0825-0001",
+      "date": "2025-08-01",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 14 days",
+      "transport_mode": "SEA",
+      "service_option": "DOOR_TO_DOOR",
+      "notes": "Demo single cargo 1",
+      "multi_destination": false
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 1,
+    "fields": {
+      "quotation": 1,
+      "description": "Commodity S1",
+      "qty": 1,
+      "weight_kg": 100,
+      "volume_cbm": 5,
+      "price": 500000,
+      "amount": 500000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 1,
+    "fields": {
+      "cargo": 1,
+      "description": "Handling Fee",
+      "qty": 1,
+      "rate": 100000,
+      "amount": 100000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 2,
+    "fields": {
+      "cargo": 1,
+      "description": "Documentation",
+      "qty": 1,
+      "rate": 50000,
+      "amount": 50000
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 2,
+    "fields": {
+      "number": "QFR-0825-0002",
+      "date": "2025-08-03",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 30 days",
+      "transport_mode": "SEA",
+      "service_option": "PORT_TO_PORT",
+      "notes": "Demo multi cargo 1",
+      "multi_destination": true
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 2,
+    "fields": {
+      "quotation": 2,
+      "description": "Commodity M1-1",
+      "qty": 2,
+      "weight_kg": 200,
+      "volume_cbm": 8,
+      "price": 750000,
+      "amount": 1500000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 3,
+    "fields": {
+      "cargo": 2,
+      "description": "Trucking Fee",
+      "qty": 2,
+      "rate": 250000,
+      "amount": 500000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 4,
+    "fields": {
+      "cargo": 2,
+      "description": "Handling",
+      "qty": 1,
+      "rate": 125000,
+      "amount": 125000
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 3,
+    "fields": {
+      "quotation": 2,
+      "description": "Commodity M1-2",
+      "qty": 1,
+      "weight_kg": 120,
+      "volume_cbm": 4,
+      "price": 600000,
+      "amount": 600000,
+      "origin": null,
+      "destination": null
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 3,
+    "fields": {
+      "number": "QFR-0825-0003",
+      "date": "2025-08-05",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 14 days",
+      "transport_mode": "AIR",
+      "service_option": "AIRPORT_TO_AIRPORT",
+      "notes": "Demo single cargo 2",
+      "multi_destination": false
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 4,
+    "fields": {
+      "quotation": 3,
+      "description": "Commodity S2",
+      "qty": 1,
+      "weight_kg": 80,
+      "volume_cbm": 2,
+      "price": 900000,
+      "amount": 900000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 5,
+    "fields": {
+      "cargo": 4,
+      "description": "Terminal Fee",
+      "qty": 1,
+      "rate": 150000,
+      "amount": 150000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 6,
+    "fields": {
+      "cargo": 4,
+      "description": "Security",
+      "qty": 1,
+      "rate": 50000,
+      "amount": 50000
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 4,
+    "fields": {
+      "number": "QFR-0825-0004",
+      "date": "2025-08-07",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 30 days",
+      "transport_mode": "LAND",
+      "service_option": "TRUCKING",
+      "notes": "Demo multi cargo 2",
+      "multi_destination": true
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 5,
+    "fields": {
+      "quotation": 4,
+      "description": "Commodity M2-1",
+      "qty": 3,
+      "weight_kg": 350,
+      "volume_cbm": 10,
+      "price": 400000,
+      "amount": 1200000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 7,
+    "fields": {
+      "cargo": 5,
+      "description": "Toll Fee",
+      "qty": 1,
+      "rate": 100000,
+      "amount": 100000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 8,
+    "fields": {
+      "cargo": 5,
+      "description": "Loading",
+      "qty": 1,
+      "rate": 80000,
+      "amount": 80000
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 6,
+    "fields": {
+      "quotation": 4,
+      "description": "Commodity M2-2",
+      "qty": 1,
+      "weight_kg": 150,
+      "volume_cbm": 6,
+      "price": 350000,
+      "amount": 350000,
+      "origin": null,
+      "destination": null
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 5,
+    "fields": {
+      "number": "QFR-0825-0005",
+      "date": "2025-08-09",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 14 days",
+      "transport_mode": "SEA",
+      "service_option": "PORT_TO_PORT",
+      "notes": "Demo single cargo 3",
+      "multi_destination": false
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 7,
+    "fields": {
+      "quotation": 5,
+      "description": "Commodity S3",
+      "qty": 1,
+      "weight_kg": 90,
+      "volume_cbm": 3,
+      "price": 650000,
+      "amount": 650000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 9,
+    "fields": {
+      "cargo": 7,
+      "description": "Port Handling",
+      "qty": 1,
+      "rate": 120000,
+      "amount": 120000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 10,
+    "fields": {
+      "cargo": 7,
+      "description": "BL Fee",
+      "qty": 1,
+      "rate": 75000,
+      "amount": 75000
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 6,
+    "fields": {
+      "number": "QFR-0825-0006",
+      "date": "2025-08-12",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 30 days",
+      "transport_mode": "AIR",
+      "service_option": "AIRPORT_TO_AIRPORT",
+      "notes": "Demo multi cargo 3",
+      "multi_destination": true
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 8,
+    "fields": {
+      "quotation": 6,
+      "description": "Commodity M3-1",
+      "qty": 2,
+      "weight_kg": 140,
+      "volume_cbm": 3,
+      "price": 1200000,
+      "amount": 2400000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 11,
+    "fields": {
+      "cargo": 8,
+      "description": "AWB Fee",
+      "qty": 1,
+      "rate": 175000,
+      "amount": 175000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 12,
+    "fields": {
+      "cargo": 8,
+      "description": "Security Screening",
+      "qty": 1,
+      "rate": 90000,
+      "amount": 90000
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 9,
+    "fields": {
+      "quotation": 6,
+      "description": "Commodity M3-2",
+      "qty": 1,
+      "weight_kg": 60,
+      "volume_cbm": 1,
+      "price": 800000,
+      "amount": 800000,
+      "origin": null,
+      "destination": null
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 7,
+    "fields": {
+      "number": "QFR-0825-0007",
+      "date": "2025-08-15",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 14 days",
+      "transport_mode": "LAND",
+      "service_option": "TRUCKING",
+      "notes": "Demo single cargo 4",
+      "multi_destination": false
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 10,
+    "fields": {
+      "quotation": 7,
+      "description": "Commodity S4",
+      "qty": 1,
+      "weight_kg": 300,
+      "volume_cbm": 12,
+      "price": 300000,
+      "amount": 300000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 13,
+    "fields": {
+      "cargo": 10,
+      "description": "Escort Fee",
+      "qty": 1,
+      "rate": 85000,
+      "amount": 85000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 14,
+    "fields": {
+      "cargo": 10,
+      "description": "Parking",
+      "qty": 1,
+      "rate": 25000,
+      "amount": 25000
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 8,
+    "fields": {
+      "number": "QFR-0825-0008",
+      "date": "2025-08-18",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 30 days",
+      "transport_mode": "SEA",
+      "service_option": "DOOR_TO_DOOR",
+      "notes": "Demo multi cargo 4",
+      "multi_destination": true
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 11,
+    "fields": {
+      "quotation": 8,
+      "description": "Commodity M4-1",
+      "qty": 2,
+      "weight_kg": 220,
+      "volume_cbm": 7,
+      "price": 700000,
+      "amount": 1400000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 15,
+    "fields": {
+      "cargo": 11,
+      "description": "Port Storage",
+      "qty": 1,
+      "rate": 110000,
+      "amount": 110000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 16,
+    "fields": {
+      "cargo": 11,
+      "description": "Fumigation",
+      "qty": 1,
+      "rate": 130000,
+      "amount": 130000
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 12,
+    "fields": {
+      "quotation": 8,
+      "description": "Commodity M4-2",
+      "qty": 1,
+      "weight_kg": 150,
+      "volume_cbm": 5,
+      "price": 600000,
+      "amount": 600000,
+      "origin": null,
+      "destination": null
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 9,
+    "fields": {
+      "number": "QFR-0825-0009",
+      "date": "2025-08-22",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 14 days",
+      "transport_mode": "AIR",
+      "service_option": "AIRPORT_TO_AIRPORT",
+      "notes": "Demo single cargo 5",
+      "multi_destination": false
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 13,
+    "fields": {
+      "quotation": 9,
+      "description": "Commodity S5",
+      "qty": 1,
+      "weight_kg": 70,
+      "volume_cbm": 1,
+      "price": 1000000,
+      "amount": 1000000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 17,
+    "fields": {
+      "cargo": 13,
+      "description": "Documentation",
+      "qty": 1,
+      "rate": 60000,
+      "amount": 60000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 18,
+    "fields": {
+      "cargo": 13,
+      "description": "Terminal Fee",
+      "qty": 1,
+      "rate": 140000,
+      "amount": 140000
+    }
+  },
+
+  {
+    "model": "sales.freightquotation",
+    "pk": 10,
+    "fields": {
+      "number": "QFR-0825-0010",
+      "date": "2025-08-27",
+      "customer": 1,
+      "currency": "IDR",
+      "payment_term": "TOP 30 days",
+      "transport_mode": "LAND",
+      "service_option": "TRUCKING",
+      "notes": "Demo multi cargo 5",
+      "multi_destination": true
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 14,
+    "fields": {
+      "quotation": 10,
+      "description": "Commodity M5-1",
+      "qty": 3,
+      "weight_kg": 280,
+      "volume_cbm": 9,
+      "price": 320000,
+      "amount": 960000,
+      "origin": null,
+      "destination": null
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 19,
+    "fields": {
+      "cargo": 14,
+      "description": "Loading",
+      "qty": 1,
+      "rate": 70000,
+      "amount": 70000
+    }
+  },
+  {
+    "model": "sales.freightcharge",
+    "pk": 20,
+    "fields": {
+      "cargo": 14,
+      "description": "Escort Fee",
+      "qty": 1,
+      "rate": 90000,
+      "amount": 90000
+    }
+  },
+  {
+    "model": "sales.freightcargo",
+    "pk": 15,
+    "fields": {
+      "quotation": 10,
+      "description": "Commodity M5-2",
+      "qty": 1,
+      "weight_kg": 160,
+      "volume_cbm": 5,
+      "price": 360000,
+      "amount": 360000,
+      "origin": null,
+      "destination": null
+    }
+  }
+]

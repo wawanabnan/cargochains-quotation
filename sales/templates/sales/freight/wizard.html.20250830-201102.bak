@@ -51,75 +51,73 @@
       </form>
 
     {% elif step == 'lines' %}
-  <form method="post" novalidate>
-    {% csrf_token %}
+      <form method="post" novalidate>
+        {% csrf_token %}
 
-    {{ cargo_fs.management_form }}
-    {{ charge_fs.management_form }}
+        {{ cargo_fs.management_form }}
+        <h6 class="mb-2">Cargo Detail</h6>
+        <div class="table-responsive mb-3">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Description</th>
+                <th class="text-end" style="width:100px;">Qty</th>
+                <th class="text-end" style="width:120px;">Weight (kg)</th>
+                <th class="text-end" style="width:120px;">Volume (cbm)</th>
+                <th class="text-end" style="width:120px;">Price</th>
+                <th class="text-end" style="width:140px;">Amount</th>
+                <th style="width:220px;">Origin</th>
+                <th style="width:220px;">Destination</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in cargo_fs %}
+              <tr>
+                <td>{{ f.description }} {{ f.description.errors }}</td>
+                <td class="text-end">{{ f.qty }} {{ f.qty.errors }}</td>
+                <td class="text-end">{{ f.weight_kg }} {{ f.weight_kg.errors }}</td>
+                <td class="text-end">{{ f.volume_cbm }} {{ f.volume_cbm.errors }}</td>
+                <td class="text-end">{{ f.price }} {{ f.price.errors }}</td>
+                <td class="text-end">{{ f.amount }} {{ f.amount.errors }}</td>
+                <td>{{ f.origin }} {{ f.origin.errors }}</td>
+                <td>{{ f.destination }} {{ f.destination.errors }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
-    <h6 class="mb-2">Cargo Detail</h6>
-    <div class="table-responsive mb-3">
-      <table class="table table-sm align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Description</th>
-            <th class="text-end" style="width:100px;">Qty</th>
-            <th class="text-end" style="width:120px;">Weight (kg)</th>
-            <th class="text-end" style="width:120px;">Volume (cbm)</th>
-            <th class="text-end" style="width:120px;">Price</th>
-            <th class="text-end" style="width:140px;">Amount</th>
-            <th style="width:220px;">Origin</th>
-            <th style="width:220px;">Destination</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for f in cargo_fs %}
-          <tr>
-            <td>{{ f.description }} {{ f.description.errors }}</td>
-            <td class="text-end">{{ f.qty }} {{ f.qty.errors }}</td>
-            <td class="text-end">{{ f.weight_kg }} {{ f.weight_kg.errors }}</td>
-            <td class="text-end">{{ f.volume_cbm }} {{ f.volume_cbm.errors }}</td>
-            <td class="text-end">{{ f.price }} {{ f.price.errors }}</td>
-            <td class="text-end">{{ f.amount }} {{ f.amount.errors }}</td>
-            <td>{{ f.origin }} {{ f.origin.errors }}</td>
-            <td>{{ f.destination }} {{ f.destination.errors }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        {{ charge_fs.management_form }}
+        <h6 class="mb-2">Cargo Charge Lines <small class="text-muted">(optional)</small></h6>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Charge</th>
+                <th class="text-end" style="width:100px;">Qty</th>
+                <th class="text-end" style="width:140px;">Rate</th>
+                <th class="text-end" style="width:140px;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in charge_fs %}
+              <tr>
+                <td>{{ f.description }} {{ f.description.errors }}</td>
+                <td class="text-end">{{ f.qty }} {{ f.qty.errors }}</td>
+                <td class="text-end">{{ f.rate }} {{ f.rate.errors }}</td>
+                <td class="text-end">{{ f.amount }} {{ f.amount.errors }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
-    <h6 class="mb-2">Cargo Charge Lines <small class="text-muted">(optional)</small></h6>
-    <div class="table-responsive">
-      <table class="table table-sm align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Charge</th>
-            <th class="text-end" style="width:100px;">Qty</th>
-            <th class="text-end" style="width:140px;">Rate</th>
-            <th class="text-end" style="width:140px;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for f in charge_fs %}
-          <tr>
-            <td>{{ f.description }} {{ f.description.errors }}</td>
-            <td class="text-end">{{ f.qty }} {{ f.qty.errors }}</td>
-            <td class="text-end">{{ f.rate }} {{ f.rate.errors }}</td>
-            <td class="text-end">{{ f.amount }} {{ f.amount.errors }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="d-flex justify-content-between mt-3">
-      <a href="?step=header" class="btn btn-outline-secondary rounded-0">Back</a>
-      <button class="btn btn-primary rounded-0" type="submit">Create</button>
-    </div>
-  </form>
-{% endif %}
-
+        <div class="d-flex justify-content-between mt-3">
+          <a href="?step=header" class="btn btn-outline-secondary rounded-0">Back</a>
+          <button class="btn btn-primary rounded-0" type="submit">Create</button>
+        </div>
+      </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

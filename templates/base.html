@@ -22,7 +22,7 @@
       media="print"
       onload="this.media='all'"
     />
-    <link rel="stylesheet" href="{% static 'addminlte/css/adminlte-fixes.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/css/adminlte-fixes.css' %}">
 
     <!--end::Fonts-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
@@ -50,6 +50,8 @@
       integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0="
       crossorigin="anonymous"
     />
+
+      {% block extra_css %}{% endblock %}
     <!-- jsvectormap -->
     <link
       rel="stylesheet"
@@ -59,6 +61,8 @@
     />
     <link rel="stylesheet" href="{% static 'adminlte/css/custom.css' %}"/>
       <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
 
 </head>
 <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">

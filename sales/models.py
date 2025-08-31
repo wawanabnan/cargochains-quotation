@@ -4,6 +4,7 @@ from geo.models import Location
 from partners.models import Partner
 from settings.models import Setting  
 from django.db import models, IntegrityError, transaction
+from django.utils import timezone
 
 
 class FreightQuotation(models.Model):
@@ -22,9 +23,9 @@ class FreightQuotation(models.Model):
     multi_destination = models.BooleanField(default=False)
     payment_term = models.CharField(max_length=50, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    created_at = models.DateTimeField(default=timezone.now)  # ganti auto_now_add
+    updated_at = models.DateTimeField(default=timezone.now)  # ganti auto_now
+    
     def save(self, *args, **kwargs):
         # Saat create dan number kosong -> generate
         if not self.pk and not getattr(self, "number", None):

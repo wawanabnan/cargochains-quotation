@@ -24,6 +24,8 @@
             <td class="text-end">{{ c.qty }}</td>
             <td class="text-end">{{ c.weight_kg }}</td>
             <td class="text-end">{{ c.volume_cbm }}</td>
+			<td class="text-end">{{ c.price }}</td>
+			
             <td class="text-end">{{ c.amount }}</td>
             <td>
               {% if q.multi_destination %}{{ c.origin }} → {{ c.destination }}{% else %}{{ q.origin }} → {{ q.destination }}{% endif %}
