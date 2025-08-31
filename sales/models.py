@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from geo.models import Location
 from partners.models import Partner
+from settings.models import Setting  
+from django.db import models, IntegrityError, transaction
 
 
 class FreightQuotation(models.Model):
@@ -23,11 +25,28 @@ class FreightQuotation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        # Saat create dan number kosong -> generate
+        if not self.pk and not getattr(self, "number", None):
+            # retry 3x kalau bentrok UNIQUE
+            for _ in range(3):
+                self.number = _generate_next_number(self.__class__)
+                try:
+                    with transaction.atomic():
+                        return super().save(*args, **kwargs)
+                except IntegrityError:
+                    # kemungkinan ada create paralel, coba ulang nomor
+                    self.number = None
+                    continue
+            # kalau masih bentrok, biarkan IntegrityError dari save terakhir
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.number or f"FQ-{self.pk or ''}"
+        
     class Meta:
         ordering = ("-date", "-id")
 
-    def __str__(self):
-        return self.number or f"FQ-{self.pk}"
 
 class FreightCargo(models.Model):
     quotation = models.ForeignKey("sales.FreightQuotation", on_delete=models.CASCADE, related_name="cargos")
@@ -55,3 +74,77 @@ class FreightCharge(models.Model):
 
     def __str__(self):
         return self.description or f"Charge-{self.pk}"
+
+def get_app_setting(key, default=None):
+    from settings.models import Setting  # app settings Anda
+    try:
+        row = Setting.objects.filter(key=key).only("value").first()
+        return row.value if row and row.value not in ("", None) else default
+    except Exception:
+        return default
+
+def _get_fmt(biz: str) -> str:
+    # Prioritas: tipe-spesifik -> generic -> default
+    fmt = get_app_setting(f"QUO_FORMAT_{biz}", None)
+    if fmt: return fmt
+    fmt = get_app_setting("QUO_FORMAT", None)
+    return fmt or "QFR-%m%y-%04d"
+
+def _get_scope(biz: str) -> str:
+    scope = get_app_setting(f"QUO_SCOPE_{biz}", None)
+    if scope: return scope.upper()
+    scope = get_app_setting("QUO_SCOPE", "FMT")
+    return (scope or "FMT").upper()
+
+def _visible_prefix_from_format(fmt: str, today):
+    if "%0" not in fmt or "d" not in fmt.split("%0")[-1]:
+        fmt = fmt.rstrip("-") + "-%04d"
+    return today.strftime(fmt.split("%0")[0])
+
+# sebelum: def _generate_next_number(model_cls, biz: str) -> str:
+def _generate_next_number(model_cls, biz: str | None = None) -> str:
+    """
+    Bangun nomor berdasar format. Reset per prefix (biasanya per bulan).
+    biz opsional: jika None, ambil dari model_cls.BUSINESS_TYPE atau 'FREIGHT'
+    """
+    if biz is None:
+        biz = getattr(model_cls, "BUSINESS_TYPE", "FREIGHT")
+    biz = (biz or "FREIGHT").upper()
+
+    from django.utils import timezone
+    today = timezone.localdate()
+
+    # --- ambil format & scope per bisnis type ---
+    fmt   = _get_fmt(biz)      # gunakan helper per-type: QUO_FORMAT_<BIZ> → QUO_FORMAT → default
+    scope = _get_scope(biz)    # QUO_SCOPE_<BIZ> → QUO_SCOPE → 'FMT'
+
+    # pastikan ada placeholder sequence
+    if "%0" not in fmt or "d" not in fmt.split("%0")[-1]:
+        fmt = fmt.rstrip("-") + "-%04d"
+
+    # prefix tampilan (sesuai format)
+    visible_prefix = _visible_prefix_from_format(fmt, today)
+    # pencarian reset (MONTH/YEAR/ GLOBAL / FMT) — praktik terbaik: selaraskan format dg scope
+    search_prefix = visible_prefix
+
+    last = (model_cls.objects
+            .filter(number__startswith=search_prefix)
+            .order_by("number")
+            .last())
+    if last:
+        try:
+            last_seq = int(last.number.replace(search_prefix, ""))
+        except Exception:
+            last_seq = 0
+        next_seq = last_seq + 1
+    else:
+        next_seq = 1
+
+    # width padding dari token %0Xd
+    token = fmt.split("%0")[-1] if "%0" in fmt else "4d"
+    try:
+        width = int(token[:-1])
+    except Exception:
+        width = 4
+
+    return f"{visible_prefix}{next_seq:0{width}d}"

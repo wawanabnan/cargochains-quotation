@@ -1,30 +1,17 @@
 {% extends "base.html" %}
-{% block title %}New Freight Quotation{% endblock %}
+{% block title %}Freight Quotation Wizard{% endblock %}
 
 {% block content %}
 <div class="card shadow-sm border-0">
   <div class="card-header py-2">
     <ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item {% if step == 'type' %}active{% endif %}">Pilih Jenis Quotation</li>
       <li class="breadcrumb-item {% if step == 'header' %}active{% endif %}">Header Information</li>
       <li class="breadcrumb-item {% if step == 'lines' %}active{% endif %}">Cargo & Charges</li>
     </ol>
   </div>
 
   <div class="card-body">
-    {# ===================== STEP: TYPE ===================== #}
-    {% if step == 'type' %}
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <p class="mb-2">Jenis yang dipilih: <strong>Freight</strong></p>
-        <div class="d-flex justify-content-between mt-3">
-          <a href="{% url 'sales:freight_list' %}" class="btn btn-outline-secondary rounded-0">Cancel</a>
-          <button class="btn btn-primary rounded-0" type="submit">Next</button>
-        </div>
-      </form>
-
-    {# ===================== STEP: HEADER ===================== #}
-    {% elif step == 'header' %}
+    {% if step == 'header' %}
       <form method="post" novalidate>
         {% csrf_token %}
         <div class="row g-3">
@@ -63,15 +50,11 @@
         </div>
       </form>
 
-    {# ===================== STEP: LINES ===================== #}
     {% elif step == 'lines' %}
       <form method="post" novalidate>
         {% csrf_token %}
 
-        {# WAJIB: management forms untuk kedua formset #}
         {{ cargo_fs.management_form }}
-        {{ charge_fs.management_form }}
-
         <h6 class="mb-2">Cargo Detail</h6>
         <div class="table-responsive mb-3">
           <table class="table table-sm align-middle">
@@ -104,6 +87,7 @@
           </table>
         </div>
 
+        {{ charge_fs.management_form }}
         <h6 class="mb-2">Cargo Charge Lines <small class="text-muted">(optional)</small></h6>
         <div class="table-responsive">
           <table class="table table-sm align-middle">
@@ -141,27 +125,60 @@
 {% block extra_js %}
 <script>
 (function(){
+  const modeSel=document.getElementById("id_transport_mode");
+  const svcSel=document.getElementById("id_service_option");
+  if(modeSel && svcSel){
+    const endpoint="{% url 'sales:freight_service_options' %}";
+    const FALLBACK = {
+      SEA:[{value:"DOOR_TO_DOOR",label:"Door to Door"},{value:"DOOR_TO_PORT",label:"Door to Port"},{value:"PORT_TO_PORT",label:"Port to Port"}],
+      AIR:[{value:"DOOR_TO_AIRPORT",label:"Door to Airport"},{value:"AIRPORT_TO_AIRPORT",label:"Airport to Airport"}],
+      LAND:[{value:"TRUCKING",label:"Trucking"}],
+    };
+    function refill(opts){
+      const prev=svcSel.value; svcSel.innerHTML="";
+      (opts||[]).forEach(o=>{
+        const el=document.createElement("option");
+        el.value=o.value; el.textContent=o.label; svcSel.appendChild(el);
+      });
+      if (![...svcSel.options].some(o=>o.value===prev) && svcSel.options.length){
+        svcSel.value=svcSel.options[0].value;
+      }
+    }
+    async function fetchOps(mode){
+      try{
+        const ctl = new AbortController();
+        const t=setTimeout(()=>ctl.abort(),4000);
+        const r=await fetch(endpoint+"?mode="+encodeURIComponent(mode),{headers:{"X-Requested-With":"XMLHttpRequest"},signal:ctl.signal});
+        clearTimeout(t);
+        if(!r.ok){ refill(FALLBACK[mode]||[]); return; }
+        const d=await r.json();
+        refill(d.options && d.options.length ? d.options : (FALLBACK[mode]||[]));
+      }catch(e){ refill(FALLBACK[mode]||[]); }
+    }
+    fetchOps(modeSel.value);
+    modeSel.addEventListener("change",()=>fetchOps(modeSel.value));
+  }
+
   // Auto-calc: Cargo amount = qty * price ; Charge amount = qty * rate
-  function calcRow(row, qtyName, priceName, amountName){
+  function calcRowQtyPrice(row, qtyName, priceName, amountName){
     const q=row.querySelector(`[name$='-${qtyName}']`);
     const p=row.querySelector(`[name$='-${priceName}']`);
     const a=row.querySelector(`[name$='-${amountName}']`);
     if(!q||!p||!a) return;
-    const qv=parseFloat(q.value||'1');
-    const pv=parseFloat(p.value||'0');
+    const qv=parseFloat(q.value||'1'); const pv=parseFloat(p.value||'0');
     a.value=((isNaN(qv)?1:qv)*(isNaN(pv)?0:pv)).toFixed(2);
   }
   function bind(tableSel, qtyName, priceName, amountName){
     document.querySelectorAll(tableSel+' tbody tr').forEach(tr=>{
-      const h=()=>calcRow(tr, qtyName, priceName, amountName);
-      tr.addEventListener('input', h); h();
+      const handler=()=>calcRowQtyPrice(tr, qtyName, priceName, amountName);
+      tr.addEventListener('input', handler);
+      handler();
     });
   }
-  // Bind setelah DOM siap
-  document.addEventListener('DOMContentLoaded', function(){
-    bind('.card-body table:nth-of-type(1)', 'qty','price','amount'); // cargo
-    bind('.card-body table:nth-of-type(2)', 'qty','rate','amount');  // charges
-  });
+  // Cargo: table pertama
+  bind('.card-body table:nth-of-type(1)', 'qty','price','amount');
+  // Charge: table kedua (rate sebagai "price")
+  bind('.card-body table:nth-of-type(2)', 'qty','rate','amount');
 })();
 </script>
 {% endblock %}

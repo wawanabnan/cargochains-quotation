@@ -1,4 +1,3 @@
-from .forms import FreightHeaderForm, FreightCargoForm, FreightChargeForm, CargoFormSet, ChargeFormSet
 # sales/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -94,102 +93,12 @@ def freight_create_wizard(request):
         CargoFS = CargoFormSet
         ChargeFS = ChargeFormSet
 
-        if request.method == "POST":
-            cargo_fs = CargoFS(request.POST, prefix="cargo")
-            charge_fs = ChargeFS(request.POST, prefix="charge")
+    if request.method == "POST":
+        cargo_fs = CargoFS(request.POST, prefix="cargo")
+        charge_fs = ChargeFS(request.POST, prefix="charge")
 
-            # Filter dropdown lokasi sesuai mode
-            mode = (hdr.get("transport_mode") or "SEA").upper()
-            if mode == "SEA":
-                loc_types = [Location.SEAPORT, Location.JETTY]
-            elif mode == "AIR":
-                loc_types = [Location.AIRPORT]
-            else:
-                loc_types = [Location.CITY, Location.JETTY]
-            loc_qs = Location.objects.filter(type__in=loc_types).order_by("name")
-
-            for f in cargo_fs.forms:
-                if "origin" in f.fields:
-                    f.fields["origin"].queryset = loc_qs
-                if "destination" in f.fields:
-                    f.fields["destination"].queryset = loc_qs
-
-            if cargo_fs.is_valid() and charge_fs.is_valid():
-                # buat quotation header
-                q = FreightQuotation.objects.create(
-                    date=datetime.date.fromisoformat(hdr["date"]),
-                    customer_id=hdr["customer_id"],
-                    currency=hdr.get("currency") or "IDR",
-                    payment_term=hdr.get("payment_term") or "",
-                    transport_mode=hdr["transport_mode"],
-                    service_option=hdr["service_option"],
-                    notes=hdr.get("notes") or "",
-                    multi_destination=False,
-                )
-
-                cargos_created = 0
-                for f in cargo_fs:
-                    cd = f.cleaned_data or {}
-                    # lewati baris kosong
-                    if not any(cd.get(k) for k in ("description","qty","weight_kg","volume_cbm","price","amount","origin","destination")):
-                        continue
-                    qty = cd.get("qty") or 1
-                    price = cd.get("price") or 0
-                    amount = cd.get("amount") or (qty * price)
-                    FreightCargo.objects.create(
-                        quotation=q,
-                        description=cd.get("description") or "",
-                        qty=qty,
-                        weight_kg=cd.get("weight_kg") or 0,
-                        volume_cbm=cd.get("volume_cbm") or 0,
-                        price=price,
-                        amount=amount,
-                        origin=cd.get("origin"),
-                        destination=cd.get("destination"),
-                    )
-                    cargos_created += 1
-
-                if cargos_created < 1:
-                    q.delete()
-                    messages.error(request, "Minimal satu Cargo wajib diisi.")
-                    return render(request, "sales/freight/wizard.html", {
-                        "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
-                    })
-
-                # Charges opsional → attach ke cargo pertama
-                first_cargo = q.cargos.first()
-                if first_cargo:
-                    for f in charge_fs:
-                        cd = f.cleaned_data or {}
-                        if not any(cd.get(k) for k in ("description","qty","rate","amount")):
-                            continue
-                        qty = cd.get("qty") or 1
-                        rate = cd.get("rate") or 0
-                        amount = cd.get("amount") or (qty * rate)
-                        FreightCharge.objects.create(
-                            cargo=first_cargo,
-                            description=cd.get("description") or "",
-                            qty=qty,
-                            rate=rate,
-                            amount=amount,
-                        )
-
-                _wiz_clear(request)
-                messages.success(request, f"Freight Quotation {q.number} berhasil dibuat.")
-                return redirect("sales:freight_list")
-
-            # invalid formset
-            messages.error(request, "Periksa isian Cargo / Charge.")
-            return render(request, "sales/freight/wizard.html", {
-                "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
-            })
-
-        # GET: tampilkan formset kosong dengan prefix konsisten
-        cargo_fs = CargoFS(prefix="cargo")
-        charge_fs = ChargeFS(prefix="charge")
-
-        # set queryset lokasi untuk dropdown origin/destination
-        mode = (hdr.get("transport_mode") or "SEA").upper()
+        # Filter dropdown lokasi sesuai mode
+        mode = hdr.get("transport_mode", "SEA").upper()
         if mode == "SEA":
             loc_types = [Location.SEAPORT, Location.JETTY]
         elif mode == "AIR":
@@ -197,7 +106,95 @@ def freight_create_wizard(request):
         else:
             loc_types = [Location.CITY, Location.JETTY]
         loc_qs = Location.objects.filter(type__in=loc_types).order_by("name")
+        for f in cargo_fs.forms:
+            if "origin" in f.fields:
+                f.fields["origin"].queryset = loc_qs
+            if "destination" in f.fields:
+                f.fields["destination"].queryset = loc_qs
 
+        if cargo_fs.is_valid() and charge_fs.is_valid():
+            # --- buat quotation di sini ---
+            q = FreightQuotation.objects.create(
+                date=datetime.date.fromisoformat(hdr["date"]),
+                customer_id=hdr["customer_id"],
+                currency=hdr["currency"] or "IDR",
+                payment_term=hdr.get("payment_term", ""),
+                transport_mode=hdr["transport_mode"],
+                service_option=hdr["service_option"],
+                notes=hdr.get("notes", ""),
+                multi_destination=False,
+            )
+
+            cargos_created = 0
+            for f in cargo_fs:
+                cd = f.cleaned_data or {}
+                if not cd:
+                    continue
+                qty = cd.get("qty") or 1
+                price = cd.get("price") or 0
+                amount = cd.get("amount") or (qty * price)
+                FreightCargo.objects.create(
+                    quotation=q,
+                    description=cd.get("description"),
+                    qty=qty,
+                    weight_kg=cd.get("weight_kg") or 0,
+                    volume_cbm=cd.get("volume_cbm") or 0,
+                    price=price,
+                    amount=amount,
+                    origin=cd.get("origin"),
+                    destination=cd.get("destination"),
+                )
+                cargos_created += 1
+
+            # cek minimal 1 cargo
+            if cargos_created < 1:
+                q.delete()  # aman, q sudah dibuat
+                messages.error(request, "Minimal satu Cargo wajib diisi.")
+                return render(request, "sales/freight/wizard.html", {
+                    "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
+                })
+
+            # charges opsional → attach ke cargo pertama
+            first_cargo = q.cargos.first()
+            if first_cargo:
+                for f in charge_fs:
+                    cd = f.cleaned_data or {}
+                    if not cd:
+                        continue
+                    qty = cd.get("qty") or 1
+                    rate = cd.get("rate") or 0
+                    amount = cd.get("amount") or (qty * rate)
+                    FreightCharge.objects.create(
+                        cargo=first_cargo,
+                        description=cd.get("description", ""),
+                        qty=qty,
+                        rate=rate,
+                        amount=amount,
+                    )
+
+            # sukses → clear wizard & redirect
+            _wiz_clear(request)
+            messages.success(request, f"Freight Quotation {q.number} berhasil dibuat.")
+            return redirect("sales:freight_list")
+
+        # kalau form tidak valid
+        messages.error(request, "Periksa isian Cargo / Charge.")
+        return render(request, "sales/freight/wizard.html", {
+            "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
+        })
+
+        # --- GET: tampilkan form kosong ---
+        cargo_fs = CargoFS(prefix="cargo")
+        charge_fs = ChargeFS(prefix="charge")
+        # filter queryset lokasi sama seperti di atas
+        mode = hdr.get("transport_mode", "SEA").upper()
+        if mode == "SEA":
+            loc_types = [Location.SEAPORT, Location.JETTY]
+        elif mode == "AIR":
+            loc_types = [Location.AIRPORT]
+        else:
+            loc_types = [Location.CITY, Location.JETTY]
+        loc_qs = Location.objects.filter(type__in=loc_types).order_by("name")
         for f in cargo_fs.forms:
             if "origin" in f.fields:
                 f.fields["origin"].queryset = loc_qs
@@ -207,6 +204,7 @@ def freight_create_wizard(request):
         return render(request, "sales/freight/wizard.html", {
             "step": "lines", "cargo_fs": cargo_fs, "charge_fs": charge_fs
         })
+
     # fallback aman
     wiz["step"] = "header"
     _wiz_set(request, wiz)
