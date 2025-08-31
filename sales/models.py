@@ -5,6 +5,7 @@ from partners.models import Partner
 from settings.models import Setting  
 from django.db import models, IntegrityError, transaction
 from django.utils import timezone
+from decimal import Decimal
 
 
 class FreightQuotation(models.Model):
@@ -22,6 +23,12 @@ class FreightQuotation(models.Model):
     # single-destination: isi di header; multi: kosong & isi per cargo
     multi_destination = models.BooleanField(default=False)
     payment_term = models.CharField(max_length=50, blank=True)
+
+    price = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+    vat = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
+    total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
+ 
 
     created_at = models.DateTimeField(default=timezone.now)  # ganti auto_now_add
     updated_at = models.DateTimeField(default=timezone.now)  # ganti auto_now
