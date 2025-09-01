@@ -11,14 +11,6 @@ TRANSPORT_CHOICES = [
     ("LAND", "Land"),
 ]
 
-SERVICE_CHOICES_UNION = [
-    ("DOOR_TO_DOOR", "Door to Door"),
-    ("DOOR_TO_PORT", "Door to Port"),
-    ("PORT_TO_PORT", "Port to Port"),
-    ("DOOR_TO_AIRPORT", "Door to Airport"),
-    ("AIRPORT_TO_AIRPORT", "Airport to Airport"),
-    ("TRUCKING", "Trucking"),
-]
 
 CURRENCY_CHOICES = [
     ("IDR", "IDR"), ("USD", "USD"), ("EUR", "EUR"),
@@ -64,8 +56,14 @@ class FreightHeaderForm(forms.ModelForm):
 
     class Meta:
         model = FreightQuotation
-        fields = ["date", "customer", "currency", "payment_term", "service_option","notes"]
+        fields = ["date", "customer", "currency", "payment_term", "transport_mode","service_option","notes"]
         widgets = {
+            "service_option": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "date": forms.DateInput(attrs={"class": "form-control form-control-sm", "type": "date"}),
+            "customer": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "currency": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "payment_term": forms.TextInput(attrs={"class": "form-control form-control-sm"}),
+            "transport_mode": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "service_option": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "customer": forms.Select(attrs={"class":"form-select form-select-sm border-0 bg-transparent p-0"}),
             "notes": forms.Textarea(attrs={"class": "form-control form-control-sm", "rows": 2}),

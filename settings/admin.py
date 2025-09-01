@@ -3,8 +3,9 @@ from .models import Setting
 
 @admin.register(Setting)
 class SettingAdmin(admin.ModelAdmin):
-    list_display = ("key", "value", "updated_at")
+    list_display = ("key", "value", "description")
     search_fields = ("key", "value")
-from django.contrib import admin
-
+    #list_editable = ("key", "price", "origin","destination")
+    
+    
 # Register your models here.

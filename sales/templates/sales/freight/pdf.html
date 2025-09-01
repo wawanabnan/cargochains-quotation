@@ -1,0 +1,187 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quotation {{ q.number }}</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; margin: 0; padding: 20px; }
+    h2 { margin: 12px 0 6px; font-size: 16px; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; }
+    th { background: #f2f3f5; text-align: left; }
+    .text-right { text-align: right; }
+    .muted { color: #666; font-size: 11px; }
+    .no-border td { border: 0; padding: 2px 4px; }
+
+    #tbl-header tr td  {border:none}
+
+
+    .wm {
+    position: fixed;
+    top: 90%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 140px;
+    color: rgba(134, 129, 129, 0.1); /* Light opacity */
+    opacity: 0.12;            /* jangan terlalu gelap */
+    transform: rotate(-30deg);
+    z-index: 0;               /* biar di belakang */
+    -webkit-transform: rotate(-30deg);
+  }
+  .wm.red { color: #b00; opacity: 0.10; }
+  .wm.green { color: #0a0; opacity: 0.10; }
+
+  /* pastikan isi dokumen berada di atas watermark */
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+
+  </style>
+</head>
+<body>
+  {% if q.status == "DRAFT" %}
+  <div class="wm">DRAFT</div>
+  {% elif q.status == "CANCELLED" %}
+  <div class="wm red">CANCELLED</div>
+  {% elif q.status == "PAID" %}
+  <div class="wm green">PAID</div>
+  {% endif %}
+
+<div class="content">  
+  <!-- Header branding (pakai tabel supaya aman di wkhtmltopdf) -->
+  <div style="margin-bottom: 100px";/>
+    <table id="tbl-header" style="width:100%; border:0; margin-bottom:20px;">
+      <tr>
+        <td style=" vertical-align:top;background-color:none;width:30px">
+          {% if COMPANY_LOGO_STATIC %}
+            <img src="{{ COMPANY_LOGO_STATIC }}" alt="logo" style="height:60px;">
+          {% endif %}
+        </td>
+        <td style="vertical-align:top;">
+          <div style="font-size:22px; font-weight:bold;">{{ COMPANY_NAME|default:"Perusahaan Anda" }}</div>
+          <div style="font-size:12px; color:#666;">{{ settings.COMPANY_TAGLINE|default:"Integrated Freight Services" }}</div>
+        </td>
+        <td style="text-align:right; vertical-align:top;">
+          <h2>Quotation {{ q.number }}</h2>
+        </td>
+      </tr>
+    </table>
+
+  </div>  
+    
+  <!-- Metadata -->
+  <div style="margin-bottom: 100px"/>;
+    <table class="no-border">
+      <tr><td style="width:200px"><strong>Date</strong></td><td>{{ q.date }}</td></tr>
+      <tr><td><strong>Customer</strong></td><td>{{ q.customer }}</td></tr>
+      <tr><td><strong>Currency</strong></td><td>{{ q.currency }}</td></tr>
+      <tr><td><strong>Freight</strong></td><td>{{ q.get_transport_mode_display }} – {{ q.get_service_option_display }}</td></tr>
+      <tr><td><strong>Payment Term</strong></td><td>{{ q.payment_term|default:"-" }}</td></tr>
+    </table>
+  </div>
+  <!-- Cargo -->
+  <table>
+    <thead>
+      <tr>
+        <th style="width:28px;">#</th>
+        <th>description</th>
+        <th style="width:70px;" class="text-right">QTY</th>
+        <th style="width:90px;" class="text-right">WEIGHT</th>
+        <th style="width:90px;" class="text-right">VOLUME</th>
+        <th style="width:90px;" class="text-right">PRICE</th>
+        <th style="width:100px;" class="text-right">AMOUNT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in cargo_rows %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          <div><strong>{{ row.obj.description|default:"(no description)" }}</strong></div>
+          <div class="muted">
+            {% if row.obj.origin %}Origin: {{ row.obj.origin }}{% endif %}
+            {% if row.obj.destination %} • Destination: {{ row.obj.destination }}{% endif %}
+          </div>
+        </td>
+        <td class="text-right">{{ row.obj.qty|default:"-" }}</td>
+        <td class="text-right">{{ row.obj.weight_kg|default:"-" }}</td>
+        <td class="text-right">{{ row.obj.volume_cbm|default:"-" }}</td>
+        <td class="text-right">{{ row.obj.price|floatformat:2 }}</td>
+        <td class="text-right">{{ row.obj.amount|floatformat:2 }}</td>
+      </tr>
+
+      {% if row.charges %}
+      <!--
+      <tr>
+        <td></td>
+        <td colspan="6" style="padding:0;">
+          <table style="width:100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Charge Description</th>
+                <th style="width:80px;" class="text-right">Qty</th>
+                <th style="width:90px;" class="text-right">Rate</th>
+                <th style="width:100px;" class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ch in row.charges %}
+              <tr>
+                <td>- {{ ch.description }}</td>
+                <td class="text-right">{{ ch.qty|default:"-" }}</td>
+                <td class="text-right">{{ ch.rate|floatformat:2 }}</td>
+                <td class="text-right">{{ ch.amount|floatformat:2 }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td colspan="3" class="text-right"><strong>Charge Total</strong></td>
+                <td class="text-right"><strong>{{ row.charge_total|floatformat:2 }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    -->
+      {% endif %}
+      <!--
+      <tr>
+        <td></td>
+        <td colspan="5" class="text-right"><strong>Line Total</strong></td>
+        <td class="text-right"><strong>{{ row.line_total|floatformat:2 }}</strong></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-right muted">No cargo lines.</td></tr>
+      {% endfor %}
+      -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" style="border:0;"></td>
+        <td class="text-right"><strong>Subtotal</strong></td>
+        <td class="text-right"><strong>{{ subtotal|floatformat:2 }}</strong></td>
+      </tr>
+      <tr>
+        <td colspan="5" style="border:0;"></td>
+        <td class="text-right">VAT</td>
+        <td class="text-right">{{ vat|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="border:0;"></td>
+        <td class="text-right"><strong>Grand Total</strong></td>
+        <td class="text-right"><strong>{{ grand_total|floatformat:2 }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  {% if q.notes %}
+  <h2>Notes</h2>
+  <div class="muted" style="white-space: pre-line;">{{ QUO_FORMAT_FREIGHT }}</div>
+  {% endif %}
+</div>
+</body>
+</html>

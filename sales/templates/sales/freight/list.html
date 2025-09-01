@@ -3,8 +3,17 @@
 
 {% block extra_css %}
 <style>
-#fq-table { --bs-table-hover-bg: #f8f9fa; }
+#fq-table { 
+    --bs-table-hover-bg: #faf9f8; 
+   cursor: pointer;
+  
+  }
+
+
+tr:hover {background-color: coral;opacity: 1;}
 #fq-table tbody tr.row-link.active > * { background-color: #d1ecf1 !important; }
+
+
 </style>
 {% endblock %}
 
@@ -36,29 +45,27 @@
           {% endfor %}
         </select>
       </div>
+    {# Mode → All Freight #}
+<div class="col-md-2">
+  <select name="mode" id="filter-mode" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Freight Mode">
+    <option value="">All Freight</option>
+    {% for code, label in mode_choices %}
+      <option value="{{ code }}" {% if filters.mode == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</div>
 
-      {# Mode → All Freight #}
-      <div class="col-md-2">
-        <select name="mode" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Freight Mode">
-          <option value="">All Freight</option>
-          <option value="SEA"  {% if filters.mode == "SEA" %}selected{% endif %}>Sea</option>
-          <option value="AIR"  {% if filters.mode == "AIR" %}selected{% endif %}>Air</option>
-          <option value="LAND" {% if filters.mode == "LAND" %}selected{% endif %}>Land</option>
-        </select>
-      </div>
-
-      {# Service dropdown #}
-      <div class="col-md-2">
-        <select name="service" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Service">
-          <option value="">All Services</option>
-             {% for code, label in service_choices %}
-              <option value="{{ code }}" {% if filters.service == code %}selected{% endif %}>{{ label }}</option>
-             {% endfor %}
-
-        </select>
-        
-      </div>
-
+{# Service → tergantung mode #}
+<div class="col-md-2">
+  <select name="service" id="filter-service" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Service">
+    <option value="">All Services</option>
+    {% for code, label in service_choices %}
+      <option value="{{ code }}" {% if filters.service == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</div>  
+     
+     
       <div class="col-md-1">
         <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm" data-bs-toggle="tooltip" title="Start date">
       </div>
@@ -119,7 +126,7 @@
           <td>{{ q.date }}</td>
           <td>{{ q.customer }}</td>
           <td>{{ q.currency }}</td>
-          <td>{{ q.transport_mode }}</td>
+          <td>{{ q.get_transport_mode_display }}</td>
          <td>{{ q.get_service_option_display }}</td>
           <td class="text-end">{{ q.cargos.count }}</td>
           <td>
@@ -178,6 +185,78 @@
     });
   });
 
+  // ---- mapping service per mode dari Django (JSON valid) ----
+  const serviceByMode = {{ service_by_mode_json|safe }};
+
+  // elemen filter
+  const form    = document.getElementById('filter-form');
+  const modeSel = document.getElementById('filter-mode') || document.querySelector('select[name="mode"]');
+  const servSel = document.getElementById('filter-service') || document.querySelector('select[name="service"]');
+
+  if (!modeSel || !servSel) return;
+
+  // Bangun ulang opsi Service berdasarkan mode
+  function rebuildServiceOptions(modeCode) {
+    // simpan value service saat ini
+    const prev = servSel.value;
+
+    // tentukan list (array of [code, label]) untuk mode yg dipilih
+    let list;
+    if (modeCode && serviceByMode[modeCode]) {
+      list = serviceByMode[modeCode];
+    } else {
+      // gabungkan semua unik: SEA, AIR, LAND
+      const seen = new Set();
+      list = [];
+      ["SEA","AIR","LAND"].forEach(k => {
+        (serviceByMode[k] || []).forEach(([code, label]) => {
+          if (!seen.has(code)) { seen.add(code); list.push([code,label]); }
+        });
+      });
+    }
+
+    // rebuild <select>
+    servSel.innerHTML = "";
+    // option default
+    const optAll = document.createElement("option");
+    optAll.value = ""; optAll.textContent = "All Services";
+    servSel.appendChild(optAll);
+
+    // append opsi sesuai list
+    list.forEach(([code,label]) => {
+      const op = document.createElement("option");
+      op.value = code; op.textContent = label;
+      servSel.appendChild(op);
+    });
+
+    // restore jika masih valid, selain itu reset ke All
+    const valid = new Set(["", ...list.map(([v]) => v)]);
+    servSel.value = valid.has(prev) ? prev : "";
+  }
+
+  // Inisialisasi awal (sesuai mode dari server)
+  rebuildServiceOptions(modeSel.value);
+
+  // Event saat mode berubah → rebuild service
+  modeSel.addEventListener('change', function(){
+    rebuildServiceOptions(this.value);
+    // (opsional) auto-submit:
+    // if (form) form.submit();
+  });
+
+  // (opsional) auto-submit saat service berubah:
+  // servSel.addEventListener('change', function(){
+  //   if (form) form.submit();
+  // });
+
+  // Bootstrap tooltips (kalau butuh)
+  if (window.bootstrap) {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+      try { new bootstrap.Tooltip(el); } catch(e){}
+    });
+  }
+
+
   // bulk actions
   const bulkForm = document.getElementById('bulk-form');
   const idsInput = document.getElementById('bulk-ids');
@@ -200,6 +279,7 @@
       bulkForm.submit();
     });
   });
+  
 })();
 </script>
 {% endblock %}

@@ -12,7 +12,11 @@ urlpatterns = [
     path("quotations/freight/<int:pk>/view/", views.freight_view, name="freight_view"),
     # AJAX
     path("quotations/freight/service-options/", views.freight_service_options, name="freight_service_options"),
-    path("quotations/freight/actions/bulk/", views.freight_bulk_action, name="freight_bulk_action"),  # << NEW
+    path("quotations/freight/actions/bulk/", views.freight_bulk_action, name="freight_bulk_action") ,
+    path("quotations/freight/<int:pk>/pdf/", views.freight_pdf, name="freight_pdf"),
+    path("quotations/freight/<int:pk>/email/", views.freight_send_email, name="freight_email"),
+
+    
 
    
 ]

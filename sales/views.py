@@ -1,33 +1,55 @@
-from django.forms import modelformset_factory
-from .forms import FreightHeaderForm, FreightCargoForm, FreightChargeForm, CargoFormSet, ChargeFormSet
 # sales/views.py
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods, require_GET, require_POST
-from django.db import transaction
-from django.http import JsonResponse
-import datetime
-from django.utils.dateparse import parse_date
 
-from .models import FreightQuotation, FreightCargo, FreightCharge
+from django.template.loader import render_to_string
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_http_methods, require_POST
+from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.forms import modelformset_factory
+from django.utils.dateparse import parse_date
+from django.db.models import Q, Prefetch
+import datetime
+import json
+
 from geo.models import Location
+from .models import FreightQuotation, FreightCargo, FreightCharge
 from .forms import (
     FreightHeaderForm, FreightCargoForm, FreightChargeForm,
     CargoFormSet, ChargeFormSet
 )
+from utils.pdf import render_pdf_from_html
 
-# Import model customer dengan fallback:
+# ==== Customer proxy / fallback ====
 try:
-    # Jika kamu punya proxy khusus customer
     from partners.models import CustomerProxy as CustomerModel
 except Exception:
-    # Fallback: pakai Partner biasa
     from partners.models import Partner as CustomerModel
 
-# Helper: ambil queryset customer yang benar
+from django.conf import settings
+from django.templatetags.static import static
+from django.contrib.staticfiles import finders
+from pathlib import Path
+import os
+
+# ==== Mapping service berdasarkan mode transport ====
+SERVICE_BY_MODE = {
+    "SEA": [
+        ("DOOR_TO_DOOR", "Door to door"),
+        ("DOOR_TO_PORT", "Door to port"),
+        ("PORT_TO_PORT", "Port to port"),
+    ],
+    "AIR": [
+        ("DOOR_TO_AIRPORT", "Door to airport"),
+        ("AIRPORT_TO_AIRPORT", "Airport to airport"),
+    ],
+    "LAND": [
+        ("TRUCKING", "Trucking"),
+    ],
+}
+
+
 def get_customer_queryset():
     qs = CustomerModel.objects.all()
-    # Jika model punya flag is_customer, filter yang bernilai True
     if hasattr(CustomerModel, "is_customer"):
         try:
             qs = qs.filter(is_customer=True)
@@ -36,23 +58,21 @@ def get_customer_queryset():
     return qs.order_by("name", "id")
 
 
-
-# --- AJAX: service options by transport mode ---
-SERVICE_OPTIONS_BY_MODE = {
-    "SEA": [("DOOR_TO_DOOR","Door to Door"), ("DOOR_TO_PORT","Door to Port"), ("PORT_TO_PORT","Port to Port")],
-    "AIR": [("DOOR_TO_AIRPORT","Door to Airport"), ("AIRPORT_TO_AIRPORT","Airport to Airport")],
-    "LAND": [("TRUCKING","Trucking")],
-}
-
+# =============================================================================
+# LIST & FILTER
+# =============================================================================
 
 def freight_list(request):
-    qs = FreightQuotation.objects.select_related("customer").all().order_by("-date", "-id")
+    qs = (FreightQuotation.objects
+          .select_related("customer")
+          .order_by("-date", "-id"))
 
+    # ---- filters (GET) ----
     number      = (request.GET.get("number") or "").strip()
     customer_id = (request.GET.get("customer_id") or "").strip()
-    mode        = (request.GET.get("mode") or "").strip()
+    mode        = (request.GET.get("mode") or "").strip()      # "SEA"/"AIR"/"LAND"
     status      = (request.GET.get("status") or "").strip()
-    service     = (request.GET.get("service") or "").strip()
+    service     = (request.GET.get("service") or "").strip()   # "PORT_TO_PORT", dst
     date_from   = parse_date(request.GET.get("date_from") or "")
     date_to     = parse_date(request.GET.get("date_to") or "")
 
@@ -71,22 +91,29 @@ def freight_list(request):
     if date_to:
         qs = qs.filter(date__lte=date_to)
 
-    # === customers dropdown ===
-    customer_qs = get_customer_queryset()
+    # === dropdown data ===
     customer_options = []
-    for c in customer_qs:
-        label = (
-            getattr(c, "name", None)
-            or getattr(c, "company_name", None)
-            or getattr(c, "code", None)
-            or f"Customer #{c.id}"
-        )
+    for c in get_customer_queryset():
+        label = (getattr(c, "name", None)
+                 or getattr(c, "company_name", None)
+                 or getattr(c, "code", None)
+                 or f"Customer #{c.id}")
         customer_options.append((c.id, label))
 
-     
-    mode_choices    = FreightQuotation._meta.get_field("transport_mode").choices
-    service_choices = FreightQuotation.SERVICE_CHOICES  # atau _meta.get_field("service_option").choices
-    
+    mode_choices = FreightQuotation._meta.get_field("transport_mode").choices or []
+
+    model_service_choices = FreightQuotation._meta.get_field("service_option").choices or []
+    if mode:
+        service_choices = SERVICE_BY_MODE.get(mode, model_service_choices)
+    else:
+        seen = set()
+        merged = []
+        for k in ("SEA", "AIR", "LAND"):
+            for code, label in SERVICE_BY_MODE.get(k, []):
+                if code not in seen:
+                    merged.append((code, label))
+                    seen.add(code)
+        service_choices = merged or model_service_choices
 
     ctx = {
         "quotations": qs,
@@ -101,15 +128,23 @@ def freight_list(request):
         },
         "status_choices": FreightQuotation.STATUS_CHOICES,
         "customer_options": customer_options,
-        "services": service_choices,
+        "mode_choices": mode_choices,
+        "service_choices": service_choices,
+        "service_by_mode_json": json.dumps(SERVICE_BY_MODE),
     }
     return render(request, "sales/freight/list.html", ctx)
 
-@require_GET
+
 def freight_service_options(request):
     mode = (request.GET.get("mode") or "").upper()
-    options = [{"value": v, "label": l} for v, l in SERVICE_OPTIONS_BY_MODE.get(mode, [])]
+    options = [{"value": v, "label": l} for v, l in SERVICE_BY_MODE.get(mode, [])]
     return JsonResponse({"mode": mode, "options": options})
+
+
+# =============================================================================
+# WIZARD CREATE (Header -> Lines)
+# =============================================================================
+
 WKEY = "freight_wizard"
 
 def _wiz_get(request):
@@ -122,6 +157,7 @@ def _wiz_set(request, data):
 def _wiz_clear(request):
     if WKEY in request.session:
         del request.session[WKEY]
+
 
 @require_http_methods(["GET", "POST"])
 def freight_create_wizard(request):
@@ -207,7 +243,7 @@ def freight_create_wizard(request):
                     cd = f.cleaned_data or {}
                     # skip blank rows
                     if not any(cd.get(k) for k in (
-                        "description","qty","weight_kg","volume_cbm","price","amount","origin","destination"
+                        "description", "qty", "weight_kg", "volume_cbm", "price", "amount", "origin", "destination"
                     )):
                         continue
                     qty = cd.get("qty") or 1
@@ -267,15 +303,36 @@ def freight_create_wizard(request):
         return render(request, "sales/freight/wizard.html", {
             "step": "lines", "cargo_fs": cargo_fs
         })
+
     # fallback aman
     wiz["step"] = "header"
     _wiz_set(request, wiz)
     form = FreightHeaderForm()
     return render(request, "sales/freight/wizard.html", {"step": "header", "form_header": form})
 
-def freight_view(request, pk):
-    q = get_object_or_404(FreightQuotation, pk=pk)
-    return render(request, "sales/freight/view.html", {"q": q})
+
+# =============================================================================
+# EDIT / CHARGES / BULK
+# =============================================================================
+
+def freight_view(request, pk: int):
+    q = get_object_or_404(
+        FreightQuotation.objects.select_related("customer").prefetch_related(
+            Prefetch("cargos", queryset=FreightCargo.objects.all())
+        ),
+        pk=pk
+    )
+    cargo_rows, subtotal, vat, grand_total = _compute_totals(q)
+
+    ctx = {
+        "q": q,
+        "cargo_rows": cargo_rows,
+        "subtotal": subtotal,
+        "vat": vat,
+        "grand_total": grand_total,
+    }
+    return render(request, "sales/freight/view.html", ctx)
+
 
 def freight_edit(request, pk):
     q = get_object_or_404(FreightQuotation, pk=pk)
@@ -283,7 +340,6 @@ def freight_edit(request, pk):
         form = FreightHeaderForm(request.POST, instance=q)
         if form.is_valid():
             cd = form.cleaned_data
-            # update field yang ada di header
             q.date = cd["date"]
             q.customer = cd["customer"]
             q.currency = cd.get("currency") or q.currency
@@ -298,6 +354,7 @@ def freight_edit(request, pk):
         form = FreightHeaderForm(instance=q)
 
     return render(request, "sales/freight/edit.html", {"form": form, "q": q})
+
 
 def freight_manage_charges(request, pk):
     q = get_object_or_404(FreightQuotation, pk=pk)
@@ -341,8 +398,9 @@ def freight_manage_charges(request, pk):
         "q": q,
         "cargos": cargos,
         "current": current,
-        "formset": formset,  # nama variabel: formset
+        "formset": formset,
     })
+
 
 @require_POST
 def freight_bulk_action(request):
@@ -357,7 +415,6 @@ def freight_bulk_action(request):
     qs = FreightQuotation.objects.filter(id__in=id_list)
 
     if action == "email":
-        # dummy: anggap email terkirim
         messages.success(request, f"Send Email: {qs.count()} quotation (dummy).")
         return redirect("sales:freight_list")
 
@@ -376,3 +433,100 @@ def freight_bulk_action(request):
 
     messages.error(request, "Aksi tidak dikenal.")
     return redirect("sales:freight_list")
+
+
+def _compute_totals(quotation: FreightQuotation):
+    # hitung subtotal dari cargo.amount + charges(amount)
+    cargos = (FreightCargo.objects
+              .filter(quotation=quotation)
+              .prefetch_related(Prefetch("charges", queryset=FreightCharge.objects.all())))
+    subtotal = 0
+    cargo_rows = []
+    for c in cargos:
+        charge_total = sum(ch.amount or 0 for ch in c.charges.all())
+        line_total = (c.amount or 0) + charge_total
+        subtotal += line_total
+        cargo_rows.append({
+            "obj": c,
+            "charge_total": charge_total,
+            "line_total": line_total,
+            "charges": list(c.charges.all()),
+        })
+
+    vat = quotation.vat or 0
+    total = subtotal + vat
+    return cargo_rows, subtotal, vat, total
+
+
+def freight_send_email(request, pk: int):
+    # dummy email action
+    q = get_object_or_404(FreightQuotation, pk=pk)
+    if q.status == "DRAFT":
+        q.status = "SENT"
+        q.save(update_fields=["status"])
+    messages.success(request, f"Quotation {q.number} telah dikirim (dummy).")
+    return redirect("sales:freight_view", pk=pk)
+
+
+# =============================================================================
+# PDF: wkhtmltopdf (via pdfkit)
+# =============================================================================
+
+def freight_pdf(request, pk: int):
+    # ambil data + eager loading
+    q = get_object_or_404(
+        FreightQuotation.objects.select_related("customer").prefetch_related(
+            Prefetch("cargos", queryset=FreightCargo.objects.prefetch_related("charges"))
+        ),
+        pk=pk
+    )
+    # hitung totals + rows yang dipakai template
+    cargo_rows, subtotal, vat, grand_total = _compute_totals(q)
+
+    from django.contrib.staticfiles import finders
+    from pathlib import Path
+
+    abs_logo = finders.find("adminlte/img/cargochains.png")
+    logo_file_uri = Path(abs_logo).as_uri() if abs_logo else None
+
+    print("DEBUG LOGO FILE:", abs_logo)
+    print("DEBUG LOGO URI :", logo_file_uri)
+
+
+    ctx = {
+        "q": q,
+        "cargo_rows": cargo_rows,
+        "subtotal": subtotal,
+        "vat": vat,
+        "grand_total": grand_total,
+        "request": request,
+        "COMPANY_LOGO_STATIC":logo_file_uri
+    }
+
+    html = render_to_string("sales/freight/pdf.html", ctx, request=request)
+
+    pdf_bytes = render_pdf_from_html(html)
+
+    filename = (q.number or f"Quotation-{q.pk}").replace("/", "-") + ".pdf"
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'inline; filename="{filename}"'
+    return resp
+
+import base64, mimetypes
+def _build_logo_data_uri():
+    """
+    Cari file logo via staticfiles finders, lalu embed sebagai data URI.
+    Paling robust untuk wkhtmltopdf (tidak butuh akses http/file).
+    """
+    rel = getattr(settings, "COMPANY_LOGO_STATIC", "adminlte/img/company_logo.png")
+    abs_path = finders.find(rel)
+    if not abs_path:
+        return None  # biar template aman tetap jalan
+
+    mime, _ = mimetypes.guess_type(abs_path)
+    if not mime:
+        mime = "image/png"  # default aman
+
+    with open(abs_path, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode("ascii")
+    return f"data:{mime};base64,{b64}"

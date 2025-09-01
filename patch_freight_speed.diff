@@ -1,0 +1,410 @@
+*** Update File: sales/views.py
+@@
+-from django.template.loader import render_to_string, get_template
+-from django.contrib.staticfiles import finders
+-from django.conf import settings
+-from io import BytesIO
+-from django.db.models import Q
+-from django.forms import modelformset_factory
+-from .forms import FreightHeaderForm, FreightCargoForm, FreightChargeForm, CargoFormSet, ChargeFormSet
+-# sales/views.py
+-from django.shortcuts import render, redirect, get_object_or_404
+-from django.contrib import messages
+-from django.views.decorators.http import require_http_methods, require_GET, require_POST
+-from django.db import transaction
+-from django.http import JsonResponse
+-import datetime
+-from django.utils.dateparse import parse_date
+-
+-from .models import FreightQuotation, FreightCargo, FreightCharge
+-from geo.models import Location
+-from .forms import (
+-    FreightHeaderForm, FreightCargoForm, FreightChargeForm,
+-    CargoFormSet, ChargeFormSet
+-)
+-
+-from playwright.sync_api import sync_playwright
+-
+-import json
+-from django.db.models import Prefetch
+-from django.http import HttpResponse
+-from django.template.loader import render_to_string
+-
+-from reportlab.lib import colors
+-from reportlab.lib.pagesizes import A4
+-from reportlab.pdfgen import canvas
+-from reportlab.lib.units import mm
+-from django.shortcuts import get_object_or_404
+-
+-# xhtml2pdf selalu ada sebagai fallback
++from django.template.loader import render_to_string
++from django.shortcuts import render, redirect, get_object_or_404
++from django.views.decorators.http import require_http_methods, require_POST
++from django.http import JsonResponse, HttpResponse
++from django.contrib import messages
++from django.forms import modelformset_factory
++from django.utils.dateparse import parse_date
++from django.db.models import Q, Prefetch
++import datetime, json
++
++from geo.models import Location
++from .models import FreightQuotation, FreightCargo, FreightCharge
++from .forms import FreightHeaderForm, FreightCargoForm, FreightChargeForm, CargoFormSet, ChargeFormSet
++
++from playwright.sync_api import sync_playwright
+@@
+-# ==== PDF helper: wrap & key-value ====
+-def _wrap_text(c, text, max_width_pt, font_name="Helvetica", font_size=10):
+-    if text is None:
+-        text = ""
+-    words = str(text).split()
+-    lines, cur = [], ""
+-    for w in words or [""]:
+-        trial = (cur + " " + w).strip()
+-        if c.stringWidth(trial, font_name, font_size) <= max_width_pt:
+-            cur = trial
+-        else:
+-            lines.append(cur)
+-            cur = w
+-    if cur:
+-        lines.append(cur)
+-    return lines or [""]
+-
+-def _kv(c, x, y, key, val, w_key=30*mm, w_val=120*mm, lh=5.0*mm, fs=10):
+-    c.setFont("Helvetica", fs)
+-    c.drawString(x, y, f"{key}")
+-    # value wrap
+-    lines = _wrap_text(c, val, w_val, "Helvetica", fs)
+-    c.setFont("Helvetica-Bold", fs)
+-    c.drawString(x + w_key, y, lines[0])
+-    y -= lh
+-    c.setFont("Helvetica", fs)
+-    for ln in lines[1:]:
+-        c.drawString(x + w_key, y, ln)
+-        y -= lh
+-    return y
+-
+-def _ensure_page_space(c, y, needed, margin_bottom=18*mm, newpage_cb=None):
+-    if y - needed < margin_bottom:
+-        c.showPage()
+-        if callable(newpage_cb):
+-            newpage_cb()
+-        return True, (A4[1] - 18*mm)
+-    return False, y
+-
+-def _draw_table_header(c, x, y, cols, fs=9):
+-    c.setFillColor(colors.whitesmoke)
+-    c.rect(x, y-5, sum(w for _,w,_ in cols), 16, stroke=0, fill=1)
+-    c.setFillColor(colors.black)
+-    c.setFont("Helvetica-Bold", fs)
+-    cx = x
+-    for title, width, align in cols:
+-        if align == "R":
+-            c.drawRightString(cx + width - 2, y+6, title)
+-        elif align == "C":
+-            c.drawCentredString(cx + width/2, y+6, title)
+-        else:
+-            c.drawString(cx + 2, y+6, title)
+-        cx += width
+-    c.line(x, y-5, x + sum(w for _,w,_ in cols), y-5)
+-
+-def _draw_table_row(c, x, y, cols, values, fs=9, lh=12):
+-    c.setFont("Helvetica", fs)
+-    cx = x
+-    for i, (title, width, align) in enumerate(cols):
+-        val = values[i]
+-        if align == "R":
+-            c.drawRightString(cx + width - 2, y, val)
+-        elif align == "C":
+-            c.drawCentredString(cx + width/2, y, val)
+-        else:
+-            c.drawString(cx + 2, y, val)
+-        cx += width
+-    return y - lh
++# (HAPUS) Semua helper ReportLab/xhtml2pdf yang tidak dipakai
+@@
+-# Import model customer dengan fallback:
+-try:
+-    # Jika kamu punya proxy khusus customer
+-    from partners.models import CustomerProxy as CustomerModel
+-except Exception:
+-    # Fallback: pakai Partner biasa
+-    from partners.models import Partner as CustomerModel
+-
+-# Helper: ambil queryset customer yang benar
+-def get_customer_queryset():
+-    qs = CustomerModel.objects.all()
+-    # Jika model punya flag is_customer, filter yang bernilai True
+-    if hasattr(CustomerModel, "is_customer"):
+-        try:
+-            qs = qs.filter(is_customer=True)
+-        except Exception:
+-            pass
+-    return qs.order_by("name", "id")
++# Pakai proxy Customer jika ada, fallback ke Partner (hindari duplikasi)
++try:
++    from partners.models import CustomerProxy as CustomerModel
++except Exception:
++    from partners.models import Partner as CustomerModel
+@@
+-import json
+-import datetime
+-from django.db.models import Q
+-from django.utils.dateparse import parse_date
+-from django.contrib import messages
+-from django.shortcuts import render, redirect, get_object_or_404
+-
+-from .models import FreightQuotation, FreightCargo, FreightCharge
+-
+-# Pakai proxy Customer jika ada, fallback ke Partner
+-try:
+-    from partners.models import CustomerProxy as CustomerModel
+-except Exception:
+-    from partners.models import Partner as CustomerModel
+-
+-# Mapping service berdasarkan mode transport
+-SERVICE_BY_MODE = {
+-    "SEA": [
+-        ("DOOR_TO_DOOR", "Door to door"),
+-        ("DOOR_TO_PORT", "Door to port"),
+-        ("PORT_TO_PORT", "Port to port"),
+-    ],
+-    "AIR": [
+-        ("DOOR_TO_AIRPORT", "Door to airport"),
+-        ("AIRPORT_TO_AIRPORT", "Airport to airport"),
+-    ],
+-    "LAND": [
+-        ("TRUCKING", "Trucking"),
+-    ],
+-}
+-
+-def get_customer_queryset():
+-    qs = CustomerModel.objects.all()
+-    if hasattr(CustomerModel, "is_customer"):
+-        try:
+-            qs = qs.filter(is_customer=True)
+-        except Exception:
+-            pass
+-    return qs.order_by("name", "id")
++# Mapping service berdasarkan mode transport
++SERVICE_BY_MODE = {
++    "SEA": [
++        ("DOOR_TO_DOOR", "Door to door"),
++        ("DOOR_TO_PORT", "Door to port"),
++        ("PORT_TO_PORT", "Port to port"),
++    ],
++    "AIR": [
++        ("DOOR_TO_AIRPORT", "Door to airport"),
++        ("AIRPORT_TO_AIRPORT", "Airport to airport"),
++    ],
++    "LAND": [
++        ("TRUCKING", "Trucking"),
++    ],
++}
++
++def get_customer_queryset():
++    qs = CustomerModel.objects.all()
++    if hasattr(CustomerModel, "is_customer"):
++        try:
++            qs = qs.filter(is_customer=True)
++        except Exception:
++            pass
++    return qs.order_by("name", "id")
+@@
+-def freight_service_options(request):
+-    mode = (request.GET.get("mode") or "").upper()
+-    options = [{"value": v, "label": l} for v, l in SERVICE_OPTIONS_BY_MODE.get(mode, [])]
+-    return JsonResponse({"mode": mode, "options": options})
++def freight_service_options(request):
++    mode = (request.GET.get("mode") or "").upper()
++    # perbaiki ke SERVICE_BY_MODE
++    options = [{"value": v, "label": l} for v, l in SERVICE_BY_MODE.get(mode, [])]
++    return JsonResponse({"mode": mode, "options": options})
+@@
+-def freight_view(request, pk):
+-    q = get_object_or_404(FreightQuotation, pk=pk)
+-    return render(request, "sales/freight/view.html", {"q": q})
++# (hapus duplikasi freight_view sederhana — pertahankan satu versi lengkap di bawah)
+@@
+ def freight_view(request, pk: int):
+     q = get_object_or_404(
+         FreightQuotation.objects.select_related("customer").prefetch_related(
+             Prefetch("cargos", queryset=FreightCargo.objects.all())
+         ),
+         pk=pk
+     )
+     cargo_rows, subtotal, vat, grand_total = _compute_totals(q)
+ 
+     ctx = {
+         "q": q,
+         "cargo_rows": cargo_rows,
+         "subtotal": subtotal,
+         "vat": vat,
+         "grand_total": grand_total,
+     }
+     return render(request, "sales/freight/view.html", ctx)
+@@
+-# --- REPLACE fungsi freight_pdf sepenuhnya ---
+-def freight_pdf(request, pk: int):
+-    q = get_object_or_404(FreightQuotation, pk=pk)
+-    base_url = request.build_absolute_uri("/")
+-
+-    safe_name = (q.number or f"Quotation-{q.pk}").replace("/", "-")
+-    cache_path = cache_path_for(q, safe_name)
+-
+-    if cache_path.exists():
+-        # hit cache → nyaris instan
+-        return FileResponse(open(cache_path, "rb"), content_type="application/pdf", filename=f"{safe_name}.pdf")
+-
+-    # render HTML lalu generate PDF (cold)
+-    ctx = {
+-        "q": q,
+-        # sesuaikan jika template butuh:
+-        # "cargo_rows": q.freightcargo_set.all(),
+-        # "charges": q.freightcharge_set.all(),
+-        "subtotal": getattr(q, "subtotal", 0) or 0,
+-        "vat": getattr(q, "vat_amount", 0) or 0,
+-        "grand_total": (getattr(q, "grand_total", None) or (getattr(q, "subtotal", 0) or 0) + (getattr(q, "vat_amount", 0) or 0)),
+-    }
+-    html = render_to_string("sales/freight/pdf.html", ctx, request=request)
+-    pdf_bytes = html_to_pdf_bytes(html, base_url)
+-    cache_path.write_bytes(pdf_bytes)
+-
+-    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+-    resp["Content-Disposition"] = f'inline; filename="{safe_name}.pdf"'
+-    return resp
++# ===== Playwright SYNC pooling (launch sekali, reuse context) =====
++_PW = None
++_BROWSER = None
++_CONTEXT = None
++
++def _ensure_sync_browser():
++    global _PW, _BROWSER, _CONTEXT
++    if _BROWSER and _CONTEXT:
++        return _BROWSER, _CONTEXT
++    _PW = sync_playwright().start()
++    _BROWSER = _PW.chromium.launch()   # headless default
++    _CONTEXT = _BROWSER.new_context(
++        java_script_enabled=False,     # cepat & deterministik (template statis)
++        device_scale_factor=1.0,
++    )
++    return _BROWSER, _CONTEXT
++
++def html_to_pdf_bytes(html: str, base_url: str) -> bytes:
++    # sisipkan <base> agar asset relatif resolve
++    if "<head>" in html:
++        html = html.replace("<head>", f'<head><base href="{base_url}">', 1)
++    else:
++        html = f'<head><base href="{base_url}"></head>{html}'
++
++    browser, context = _ensure_sync_browser()
++    page = context.new_page()
++
++    def _route(route, request):
++        url = request.url
++        if url.startswith(base_url) or "/static/" in url:
++            route.continue_()
++        else:
++            route.abort()
++    page.route("**/*", _route)
++
++    page.set_content(html, wait_until="domcontentloaded")
++    page.emulate_media(media="print")
++    pdf_bytes = page.pdf(
++        format="A4",
++        print_background=True,
++        prefer_css_page_size=True,
++        margin={"top": "12mm","right":"12mm","bottom":"12mm","left":"12mm"},
++    )
++    page.unroute("**/*", _route)
++    page.close()
++    return pdf_bytes
++# ===== /Playwright SYNC pooling =====
++
++def freight_pdf(request, pk: int):
++    # ambil data + eager loading
++    q = get_object_or_404(
++        FreightQuotation.objects.select_related("customer").prefetch_related(
++            Prefetch("cargos", queryset=FreightCargo.objects.prefetch_related("charges"))
++        ),
++        pk=pk
++    )
++    # hitung totals + rows untuk template
++    cargo_rows, subtotal, vat, grand_total = _compute_totals(q)
++
++    ctx = {
++        "q": q,
++        "cargo_rows": cargo_rows,
++        "subtotal": subtotal,
++        "vat": vat,
++        "grand_total": grand_total,
++        "request": request,
++    }
++    html = render_to_string("sales/freight/pdf.html", ctx, request=request)
++    base_url = request.build_absolute_uri("/")
++    pdf_bytes = html_to_pdf_bytes(html, base_url)
++
++    filename = (q.number or f"Quotation-{q.pk}").replace("/", "-") + ".pdf"
++    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
++    resp["Content-Disposition"] = f'inline; filename="{filename}"'
++    return resp
+@@
+-def _render_pdf_reportlab(q, cargo_rows, subtotal, vat, grand_total):
+-    buffer = BytesIO()
+-    p = canvas.Canvas(buffer, pagesize=A4)
+-    width, height = A4
+-    x_margin, y = 15*mm, height - 20*mm
+-    ...
+-    return pdf
+-
+-def _brand_header(c, W, H, margin_x, company_name=None, company_tagline=None, logo_static_path="img/company_logo.png"):
+-    ...
+-    return y_top - 20  # return next y cursor
+-
+-async def _html_to_pdf_playwright(html: str, base_url: str) -> bytes:
+-    ...
+-    return pdf_bytes
+-
+-# ========== FAST PLAYWRIGHT SINGLETON ==========
+-_PW_BROWSER = None
+-_PW_CONTEXT = None
+-
+-async def _ensure_pw():
+-    ...
+-    return _PW_BROWSER, _PW_CONTEXT
+-
+-# ========== /FAST PLAYWRIGHT SINGLETON ==========
+-def _html_to_pdf_playwright_sync(html: str, base_url: str) -> bytes:
+-    ...
+-    return pdf_bytes
++# (HAPUS) seluruh fungsi ReportLab/xhtml2pdf dan Playwright versi async/sync-per-request
+*** End Patch
+*** Begin Patch
+*** Update File: sales/templates/sales/freight/pdf.html
+@@
+-  <div class="header">
+-    <img src="{% static COMPANY_LOGO_STATIC %}" alt="logo">
+-
+-    <div class="company">
+-      <div class="company-name">{{ COMPANY_NAME|default:"Perusahaan Anda" }}</div>
+-      <div class="company-tagline">{{ settings.COMPANY_TAGLINE|default:"Integrated Freight Services" }}</div>
+-    </div>
+-  </div>
++  <div class="header">
++    {% if COMPANY_LOGO_URL %}
++      <img src="{{ COMPANY_LOGO_URL }}" alt="logo">
++    {% endif %}
++    <div class="company">
++      <div class="company-name">{{ COMPANY_NAME|default:"Perusahaan Anda" }}</div>
++      <div class="company-tagline">{{ settings.COMPANY_TAGLINE|default:"Integrated Freight Services" }}</div>
++    </div>
++  </div>
+@@
+-  <!-- Judul dokumen -->
+-   <div style="float: right"/>
+-      <h2>Quotation  {{ q.number }}</h2>
+-    </div>
++  <!-- Judul dokumen -->
++  <div style="float:right;">
++    <h2>Quotation {{ q.number }}</h2>
++  </div>

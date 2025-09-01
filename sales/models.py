@@ -19,6 +19,12 @@ class FreightQuotation(models.Model):
         ("CANCELLED", "Cancelled"),
     ]
 
+    TRANSPORT_CHOICES = [
+        ("SEA", "Sea"),
+        ("AIR", "Air"),
+        ("LAND", "Land"),
+    ]
+
     SERVICE_CHOICES = [
         ("DOOR_TO_DOOR", "Door to door"),
         ("DOOR_TO_PORT", "Door to port"),
@@ -34,7 +40,7 @@ class FreightQuotation(models.Model):
     # TODO: Ganti ke model Customer/Partner Anda jika ada (mis. partners.Partner)
     customer = models.ForeignKey(Partner, on_delete=models.PROTECT)
     currency = models.CharField(max_length=10, default="IDR")
-    transport_mode = models.CharField(max_length=20, choices=[("SEA","Sea"),("AIR","Air"),("LAND","Land")])
+    transport_mode = models.CharField(max_length=20, choices=TRANSPORT_CHOICES)
     service_option = models.CharField(max_length=50, choices=SERVICE_CHOICES)
     notes = models.TextField(blank=True)
 
@@ -74,6 +80,14 @@ class FreightQuotation(models.Model):
     class Meta:
         ordering = ("-date", "-id")
 
+    def mark_pdf_stale(self, *, save=True):
+        self.pdf_generated_at = None
+        if self.pdf_file:
+            self.pdf_file.delete(save=False)
+            self.pdf_file = None
+        if save:
+            self.save(update_fields=["pdf_generated_at", "pdf_file"])
+
 
 class FreightCargo(models.Model):
     quotation = models.ForeignKey("sales.FreightQuotation", on_delete=models.CASCADE, related_name="cargos")
@@ -86,7 +100,10 @@ class FreightCargo(models.Model):
     price = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 
     # sekarang pakai master geo.Location
-    origin = models.ForeignKey("geo.Location", on_delete=models.PROTECT, null=True, blank=True, related_name="cargo_origins")
+    origin = models.ForeignKey(
+        "geo.Location", on_delete=models.PROTECT, null=True, 
+        blank=True, related_name="cargo_origins")
+        
     destination = models.ForeignKey("geo.Location", on_delete=models.PROTECT, null=True, blank=True, related_name="cargo_destinations")
 
     def __str__(self):
@@ -175,3 +192,5 @@ def _generate_next_number(model_cls, biz: str | None = None) -> str:
         width = 4
 
     return f"{visible_prefix}{next_seq:0{width}d}"
+
+
