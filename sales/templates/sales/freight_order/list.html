@@ -1,45 +1,90 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+	table th {
+		text-transform: uppercase !important;
+	}
+</style>
+
+{% endblock %}
+
 {% block content %}
 <div class="content-header">
-  <div class="container-fluid">
-    <h1 class="m-0">Freight Orders</h1>
-  </div>
+	<div class="container-fluid mb-3">
+		<div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+			<div class="d-flex align-items-center gap-3">
+				<h3 class="m-0">Freight Orders</h3>
+				<!-- Kiri judul: Create New -->
+				
+				
+			</div>
+			<form id="bulk-form" method="post" action="{% url 'sales:freight_bulk_action' %}" class="d-flex align-items-end gap-2">
+				{% csrf_token %}
+				<input type="hidden" name="ids" id="bulk-ids">		
+				<div class="col-auto">
+					<label class="form-label mb-0 small text-muted">Bulk Action</label>
+					<select name="action" id="bulk-action" class="form-select form-select-sm">
+					  <option value="">-- pilih --</option>
+					  <option value="set_status">Change Status</option>
+					  <option value="email">Send Email</option>
+					  <option value="manage_charges">Manage Charges</option>
+					  <option value="delete">Delete</option>
+					</select>
+				</div>
+
+				<div class="col-auto" id="target-status-wrap" style="display:none;">
+					<label class="form-label mb-0 small text-muted">Target Status</label>
+					<select name="target_status" class="form-select form-select-sm">
+					  {% for val,label in status_choices %}
+						<option value="{{ val }}">{{ label }}</option>
+					  {% endfor %}
+					</select>
+				</div>
+
+				<div class="col-auto">
+					<button class="btn btn-dark btn-sm" type="submit">Apply</button>
+				</div>
+    
+		</div>
+	</div>
 </div>
 
 <div class="content">
   <div class="container-fluid">
-    <div class="card shadow-sm">
+   
+		{% include 'sales/filter_order_list.html' %}
+
+   <div class="card shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
+				<th style="width:36px;"><input type="checkbox" id="check-all"></th>
                 <th style="width: 120px;">Number</th>
                 <th style="width: 110px;">Date</th>
                 <th>Customer</th>
                 <th style="width: 100px;">Mode</th>
-                <th style="width: 180px;">Service</th>
-                <th class="text-end" style="width: 140px;">Subtotal</th>
+                <th style="width: 120px;">Service</th>
                 <th class="text-end" style="width: 120px;">Total</th>
-                <th style="width: 80px;"></th>
+                <th class="text-center" style="width:110px;">Status</th>
               </tr>
             </thead>
             <tbody>
               {% for o in orders %}
               <tr onclick="window.location='{% url 'sales:freight_order_view' o.pk %}'" style="cursor:pointer">
-                <td>{{ o.number }}</td>
+			 <td><input type="checkbox" class="row-check" name="selected" value="{{ q.id }}" form="bulk-form"></td>
+              	
+			  <td>{{ o.number }}</td>
                 <td>{{ o.date|date:"Y-m-d" }}</td>
                 <td>{{ o.customer.name|default:o.customer }}</td>
                 <td>{{ o.transport_mode }}</td>
                 <td>{{ o.get_service_option_display }}</td>
-                <td class="text-end">{{ o.subtotal|floatformat:2 }}</td>
                 <td class="text-end">{{ o.total|floatformat:2 }}</td>
-                <td>
-                  <a class="btn btn-outline-secondary btn-sm" href="{% url 'sales:freight_order_view' o.pk %}">
-                    Detail
-                  </a>
+                <td class="text-center">
+					<span class="badge bg-success">{{ o.status }}</span>
                 </td>
               </tr>
               {% empty %}

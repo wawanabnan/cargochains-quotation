@@ -594,7 +594,7 @@ def _build_logo_data_uri():
 
 
 
-@login_required
+#@login_required
 @permission_required("sales.add_freightorder", raise_exception=True)
 def freight_generate_order(request, pk: int):
     q = get_object_or_404(FreightQuotation, pk=pk)
@@ -612,14 +612,14 @@ def freight_generate_order(request, pk: int):
 # sales/views.py
 
 
-@login_required
+#@login_required
 def freight_order_list(request):
     qs = (FreightOrder.objects
           .select_related("customer", "quotation")
           .order_by("-date", "-id"))
     return render(request, "sales/freight_order/list.html", {"orders": qs})
 
-@login_required
+#@login_required
 def freight_order_view(request, pk: int):
     order = get_object_or_404(
         FreightOrder.objects.select_related("customer", "quotation").prefetch_related("lines"),

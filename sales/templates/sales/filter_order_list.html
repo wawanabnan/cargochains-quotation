@@ -1,0 +1,58 @@
+<form method="get" class="card mb-3 shadow-sm">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Number</label>
+            <input type="text" name="number" value="{{ filters.number }}" class="form-control form-control-sm" placeholder="Cari nomor…">
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Customer</label>
+            <select name="customer_id" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for cid,clabel in customer_options %}
+                <option value="{{ cid }}" {% if filters.customer_id|default:'' == cid|stringformat:'s' %}selected{% endif %}>{{ clabel }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Mode</label>
+            <select name="mode" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in mode_choices %}
+                <option value="{{ val }}" {% if filters.mode == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Services</label>
+       
+            <select name="service" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in service_choices %}
+                <option value="{{ val }}" {% if filters.service == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Status</label>
+            <select name="status" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in status_choices %}
+                <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-1">
+            <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm">
+          </div>
+          <div class="col-sm-1">
+            <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm">
+          </div>
+          <div class="col-sm-2 ms-auto text-end">
+            <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-funnel"></i> Filter</button>
+            <a class="btn btn-light btn-sm" href="{% url 'sales:freight_list' %}">Reset</a>
+          </div>
+        </div>
+      </div>
+    </form>

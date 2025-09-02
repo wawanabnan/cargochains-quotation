@@ -5,8 +5,8 @@
 <div class="card shadow-sm border-0">
   <div class="card-header py-2">
     <ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item {% if step == 'header' %}active{% endif %}">Header Information</li>
-      <li class="breadcrumb-item {% if step == 'lines' %}active{% endif %}">Cargo & Charges</li>
+      <li class="breadcrumb-item {% if step == 'header' %}active{% endif %}">Header Quotation</li>
+      <li class="breadcrumb-item {% if step == 'lines' %}active{% endif %}">Cargo Detail</li>
     </ol>
   </div>
 
@@ -36,11 +36,11 @@
             {{ form_header.notes }} {{ form_header.notes.errors }}
           </div>
           <div class="col-12 col-md-6">
-            <label class="form-label">Moda Transportasi</label>
+            <label class="form-label">Freight Types</label>
             {{ form_header.transport_mode }} {{ form_header.transport_mode.errors }}
           </div>
           <div class="col-12 col-md-6">
-            <label class="form-label">Service Option</label>
+            <label class="form-label">Services</label>
             {{ form_header.service_option }} {{ form_header.service_option.errors }}
           </div>
         </div>
