@@ -19,24 +19,7 @@
         </a>
       </li>
 
-      <!-- Customers -->
-      <li class="nav-item">
-        <a href="#"
-           class="nav-link {% if '/customers' in request.path %}active{% endif %}">
-          <i class="nav-icon fas fa-users"></i>
-          <p>Customers</p>
-        </a>
-      </li>
-
-      <!-- Shipments -->
-      <li class="nav-item">
-        <a href="#"
-           class="nav-link {% if '/shipments' in request.path %}active{% endif %}">
-          <i class="nav-icon fas fa-ship"></i>
-          <p>Shipments</p>
-        </a>
-      </li>
-
+    
       <!-- Sales -->
       <li class="nav-item">
         <a href="{% url 'sales:freight_list' %}"
@@ -45,6 +28,25 @@
           <p>Sales</p>
         </a>
       </li>
+        <!-- Customers -->
+      <li class="nav-item">
+        <a href="#"
+           class="nav-link {% if '/customers' in request.path %}active{% endif %}">
+          <i class="nav-icon fas fa-users"></i>
+          <p>Customers</p>
+        </a>
+      </li>
+
+        <!-- Shipments -->
+      <li class="nav-item">
+        <a href="#"
+           class="nav-link {% if '/shipments' in request.path %}active{% endif %}">
+          <i class="nav-icon fas fa-ship"></i>
+          <p>Shipments</p>
+        </a>
+      </li>
+
+    
     </ul>
   </nav>
 </div>

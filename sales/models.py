@@ -194,3 +194,182 @@ def _generate_next_number(model_cls, biz: str | None = None) -> str:
     return f"{visible_prefix}{next_seq:0{width}d}"
 
 
+# === Helpers khusus Sales Order (SO) ===
+
+def _get_so_fmt(biz: str) -> str:
+    """
+    Ambil format nomor untuk Sales Order.
+    Urutan prioritas:
+      - SO_FORMAT_<BIZ>
+      - SO_FORMAT
+      - default "SO-%m%y-%04d"
+    Contoh format: "SO-%Y%m-%05d", "SO-%m%y-%04d", dsb.
+    """
+    fmt = get_app_setting(f"SO_FORMAT_{biz}", None)
+    if fmt:
+        return fmt
+    fmt = get_app_setting("SO_FORMAT", None)
+    return fmt or "SO-%m%y-%04d"
+
+
+def _get_so_scope(biz: str) -> str:
+    """
+    (Disiapkan kalau kamu ingin scope berbeda seperti MONTH/YEAR/FMT/…)
+    Saat ini kita tidak pakai 'scope' khusus selain mengikuti prefix dari format,
+    tetapi disediakan untuk konsistensi dengan quotation.
+    """
+    scope = get_app_setting(f"SO_SCOPE_{biz}", None)
+    if scope:
+        return scope.upper()
+    scope = get_app_setting("SO_SCOPE", "FMT")
+    return (scope or "FMT").upper()
+
+
+def _generate_next_so_number(model_cls, biz: str | None = None) -> str:
+    """
+    Generator nomor Sales Order.
+    Reset sequence-nya mengikuti perubahan prefix (yang dibentuk oleh format).
+    """
+    if biz is None:
+        biz = getattr(model_cls, "BUSINESS_TYPE", "FREIGHT")
+    biz = (biz or "FREIGHT").upper()
+
+    from django.utils import timezone
+    today = timezone.localdate()
+
+    fmt   = _get_so_fmt(biz)
+    _ = _get_so_scope(biz)  # disiapkan kalau nanti dipakai
+
+    # pastikan ada placeholder sequence %0Xd
+    if "%0" not in fmt or "d" not in fmt.split("%0")[-1]:
+        fmt = fmt.rstrip("-") + "-%04d"
+
+    # prefix tampilan dari format; ini yang dipakai untuk cari last sequence
+    visible_prefix = _visible_prefix_from_format(fmt, today)
+    search_prefix = visible_prefix
+
+    last = (model_cls.objects
+            .filter(number__startswith=search_prefix)
+            .order_by("number")
+            .last())
+    if last:
+        try:
+            last_seq = int(last.number.replace(search_prefix, ""))
+        except Exception:
+            last_seq = 0
+        next_seq = last_seq + 1
+    else:
+        next_seq = 1
+
+    # ambil width dari token %0Xd
+    token = fmt.split("%0")[-1] if "%0" in fmt else "4d"
+    try:
+        width = int(token[:-1])
+    except Exception:
+        width = 4
+
+    return f"{visible_prefix}{next_seq:0{width}d}"
+
+
+
+
+
+
+
+
+
+
+
+
+#Sales Order Area
+# === Sales Order (header + lines) ===
+from django.conf import settings
+
+class FreightOrder(models.Model):
+    BUSINESS_TYPE = "ORDER"
+
+    STATUS_CHOICES = [
+        ("DRAFT", "Draft"),
+        ("CONFIRMED", "Confirmed"),
+        ("IN_PROGRESS", "In Progress"),
+        ("DONE", "Done"),
+        ("CANCELLED", "Cancelled"),
+    ]
+
+    number = models.CharField(max_length=50, unique=True, blank=True)
+    date = models.DateField(default=timezone.localdate)
+
+    customer = models.ForeignKey(Partner, on_delete=models.PROTECT)
+    currency = models.CharField(max_length=10, default="IDR")
+
+    # selaraskan pilihan dengan FreightQuotation
+    transport_mode = models.CharField(max_length=20, choices=FreightQuotation.TRANSPORT_CHOICES)
+    service_option = models.CharField(max_length=50, choices=FreightQuotation.SERVICE_CHOICES)
+
+    payment_term = models.CharField(max_length=50, blank=True)
+    notes = models.TextField(blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="DRAFT")
+
+    subtotal = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
+    vat = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
+    total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
+
+    # 1 SQ : 1 SO (OneToOne)
+    quotation = models.OneToOneField(
+        FreightQuotation, on_delete=models.PROTECT, related_name="order"
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "freight_order"
+        ordering = ("-date", "-id")
+
+    def save(self, *args, **kwargs):
+        # generate number saat create
+        if not self.pk and not getattr(self, "number", None):
+            for _ in range(3):
+                self.number = _generate_next_so_number(self.__class__, getattr(self, "BUSINESS_TYPE", "FREIGHT"))
+            
+                try:
+                    with transaction.atomic():
+                        return super().save(*args, **kwargs)
+                except IntegrityError:
+                    self.number = None
+                    continue
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.number or f"SO-{self.pk or ''}"
+
+
+class FreightOrderLine(models.Model):
+    order = models.ForeignKey(FreightOrder, on_delete=models.CASCADE, related_name="lines")
+
+    description = models.CharField(max_length=255)
+    qty = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal("0.00"))
+    amount = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal("0.00"))
+
+    weight_kg = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
+    volume_cbm = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
+
+    origin = models.ForeignKey(
+        Location, on_delete=models.PROTECT, null=True, blank=True, related_name="order_cargo_origins"
+    )
+    destination = models.ForeignKey(
+        Location, on_delete=models.PROTECT, null=True, blank=True, related_name="order_cargo_destinations"
+    )
+
+    class Meta:
+        db_table = "freight_order_line"
+        ordering = ("id",)
+
+    def __str__(self):
+        return f"{self.description} ({self.qty} x {self.price})"
+    

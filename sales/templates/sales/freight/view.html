@@ -28,6 +28,12 @@
     <a href="{% url 'sales:freight_pdf' q.id %}" target="_blank"   class="btn btn-outline-dark rounded-0" data-bs-toggle="tooltip" title="Download PDF">
       <i class="fa fa-file-pdf"></i> PDF
     </a>
+    {% if perms.sales.add_freightorder and not q.order_id and q.cargos.all %}
+      <a class="btn btn-primary btn-sm" href="{% url 'sales:freight_generate_order' q.pk %}">
+        <i class="bi bi-magic"></i> Generate Sales Order
+      </a>
+    {% endif %}
+
   </div>
 </div>
 

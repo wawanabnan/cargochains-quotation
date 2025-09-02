@@ -56,7 +56,6 @@ SERVICE_BY_MODE = {
 }
 
 
-
 def get_customer_queryset():
     qs = CustomerModel.objects.all()
     if hasattr(CustomerModel, "is_customer"):
@@ -99,19 +98,6 @@ def freight_list(request):
         qs = qs.filter(date__gte=date_from)
     if date_to:
         qs = qs.filter(date__lte=date_to)
-
-    from django.db.models import Sum, Value, DecimalField
-    from django.db.models.functions import Coalesce
-    qs = (FreightQuotation.objects
-        .select_related("customer")
-        .annotate(
-            cargo_total=Coalesce(
-                Sum("cargos__amount"),
-                Value(0, output_field=DecimalField(max_digits=18, decimal_places=2))
-            )
-        )
-        .order_by("-date", "-id"))
-
 
     # === dropdown data ===
     customer_options = []
@@ -456,23 +442,6 @@ def freight_bulk_action(request):
 
     qs = FreightQuotation.objects.filter(id__in=id_list)
 
-    # --- aksi baru: set_status ---
-    if action == "set_status":
-        target = (request.POST.get("target_status") or "").upper()
-        # validasi: semua status awal harus sama
-        statuses = list(qs.values_list("status", flat=True).distinct())
-        if len(statuses) > 1:
-            messages.error(request, "Gagal: status awal tidak sama. Pilih item dengan status yang sama.")
-            return redirect("sales:freight_list")
-
-        try:
-            count = _bulk_change_status(qs, target)
-            messages.success(request, f"Berhasil ubah status {count} quotation ke {target}.")
-        except Exception as e:
-            messages.error(request, f"Gagal ubah status: {e}")
-        return redirect("sales:freight_list")
-
-    # --- aksi existing ---
     if action == "email":
         messages.success(request, f"Send Email: {qs.count()} quotation (dummy).")
         return redirect("sales:freight_list")
@@ -483,6 +452,7 @@ def freight_bulk_action(request):
 
     if action == "delete":
         count = qs.count()
+        # hati-hati: hapus child dulu
         FreightCharge.objects.filter(cargo__quotation_id__in=id_list).delete()
         FreightCargo.objects.filter(quotation_id__in=id_list).delete()
         qs.delete()
@@ -491,8 +461,6 @@ def freight_bulk_action(request):
 
     messages.error(request, "Aksi tidak dikenal.")
     return redirect("sales:freight_list")
-
-
 
 
 def _compute_totals(quotation: FreightQuotation):

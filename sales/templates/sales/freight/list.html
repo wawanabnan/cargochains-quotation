@@ -1,285 +1,214 @@
 {% extends "base.html" %}
-{% block title %}Freight Quotations{% endblock %}
-
-{% block extra_css %}
-<style>
-#fq-table { 
-    --bs-table-hover-bg: #faf9f8; 
-   cursor: pointer;
-  
-  }
-
-
-tr:hover {background-color: coral;opacity: 1;}
-#fq-table tbody tr.row-link.active > * { background-color: #d1ecf1 !important; }
-
-
-</style>
-{% endblock %}
+{% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h5 class="mb-0">Freight Quotations</h5>
-  <a href="{% url 'sales:freight_new' %}" class="btn btn-primary btn-sm rounded-0">
-    <i class="fa fa-plus"></i> Create New
-  </a>
-</div>
 
-{# ========= FILTER BAR ========= #}
-<form class="card shadow-sm border-0 mb-3" method="get" id="filter-form">
-  <div class="card-body">
-    <div class="row g-2">
-      <div class="col-md-2">
-        <input type="text" name="number" value="{{ filters.number }}" class="form-control form-control-sm" placeholder="Number">
+<!-- ===== Page Header ===== -->
+<div class="content-header" style=">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <h3 class="m-0">Freight Quotations</h3>
+        <!-- Kiri judul: Create New -->
+        <a href="{% url 'sales:freight_new' %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-lg"></i> Create
+        </a>
       </div>
 
-      {# Customer dropdown #}
-      <div class="col-md-3">
-       
-        <select name="customer_id" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Customer">
-          <option value="">All Customers</option>
-          {% for cid, clabel in customer_options %}
-            <option value="{{ cid }}" {% if filters.customer_id == cid|stringformat:"s" %}selected{% endif %}>
-              {{ clabel }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-    {# Mode → All Freight #}
-<div class="col-md-2">
-  <select name="mode" id="filter-mode" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Freight Mode">
-    <option value="">All Freight</option>
-    {% for code, label in mode_choices %}
-      <option value="{{ code }}" {% if filters.mode == code %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-</div>
+      <!-- Kanan judul: Bulk Action -->
+      <form id="bulk-form" method="post" action="{% url 'sales:freight_bulk_action' %}" class="d-flex align-items-end gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="ids" id="bulk-ids">
+        <div class="col-auto">
+    <label class="form-label mb-0 small text-muted">Bulk Action</label>
+    <select name="action" id="bulk-action" class="form-select form-select-sm">
+      <option value="">-- pilih --</option>
+      <option value="set_status">Change Status</option>
+      <option value="email">Send Email</option>
+      <option value="manage_charges">Manage Charges</option>
+      <option value="delete">Delete</option>
+    </select>
+  </div>
 
-{# Service → tergantung mode #}
-<div class="col-md-2">
-  <select name="service" id="filter-service" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Filter by Service">
-    <option value="">All Services</option>
-    {% for code, label in service_choices %}
-      <option value="{{ code }}" {% if filters.service == code %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-</div>  
-     
-     
-      <div class="col-md-1">
-        <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm" data-bs-toggle="tooltip" title="Start date">
-      </div>
-      <div class="col-md-1">
-        <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm" data-bs-toggle="tooltip" title="End date">
-      </div>
-      <div class="col-md-1 text-end">
-        <button class="btn btn-outline-secondary btn-sm rounded-0 w-100" data-bs-toggle="tooltip" title="Apply filters">
-          <i class="fa fa-filter"></i> Filter
-        </button>
-      </div>
+  <div class="col-auto" id="target-status-wrap" style="display:none;">
+    <label class="form-label mb-0 small text-muted">Target Status</label>
+    <select name="target_status" class="form-select form-select-sm">
+      {% for val,label in status_choices %}
+        <option value="{{ val }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <button class="btn btn-primary btn-sm" type="submit">Apply</button>
+  </div>
+      </form>
     </div>
   </div>
-</form>
-
-{# ========= BULK ACTIONS ========= #}
-<div class="d-flex gap-2 mb-2">
-  <form id="bulk-form" method="post" action="{% url 'sales:freight_bulk_action' %}">
-    {% csrf_token %}
-    <input type="hidden" name="ids" id="bulk-ids">
-    <input type="hidden" name="action" id="bulk-action">
-    <div class="btn-group btn-group-sm" role="group">
-      <button type="button" class="btn btn-outline-primary rounded-0" data-action="email" data-bs-toggle="tooltip" title="Send selected quotations via email (dummy)">
-        <i class="fa fa-paper-plane"></i> 
-      </button>
-      <button type="button" class="btn btn-outline-info rounded-0" data-action="manage_charges" data-bs-toggle="tooltip" title="Open Manage Charges for the first selected">
-        <i class="fa fa-coins"></i> 
-      </button>
-      <button type="button" class="btn btn-outline-danger rounded-0" data-action="delete" data-bs-toggle="tooltip" title="Delete selected quotations">
-        <i class="fa fa-trash"></i> 
-      </button>
-    </div>
-  </form>
 </div>
 
-<div class="card shadow-sm border-0">
-  <div class="table-responsive">
-    <table class="table table-sm align-middle mb-0 table-hover" id="fq-table">
-      <thead class="table-light">
-        <tr>
-          <th style="width:36px;"><input type="checkbox" id="chk-all" class="form-check-input"></th>
-          <th style="width:120px">Number</th>
-          <th style="width:120px">Date</th>
-          <th>Customer</th>
-          <th style="width:110px;">Currency</th>
-          <th style="width:110px;">Freight Types
-          <th style="width:120px;">Service</th>
-          <th style="width:120px;" class="text-end">Cargo Lines</th>
-          <th style="width:8px;">Status</th>
+<br/>
+<!-- ===== Page Body ===== -->
+<div class="content">
+  <div class="container-fluid">
+
+    <!-- ===== Toolbar Filter (di atas tabel) ===== -->
+    <form method="get" class="card mb-3 shadow-sm">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Number</label>
+            <input type="text" name="number" value="{{ filters.number }}" class="form-control form-control-sm" placeholder="Cari nomor…">
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Customer</label>
+            <select name="customer_id" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for cid,clabel in customer_options %}
+                <option value="{{ cid }}" {% if filters.customer_id|default:'' == cid|stringformat:'s' %}selected{% endif %}>{{ clabel }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Mode</label>
+            <select name="mode" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in mode_choices %}
+                <option value="{{ val }}" {% if filters.mode == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
           
-        </tr>
-      </thead>
-      <tbody>
-        {% for q in quotations %}
-        <tr class="row-link" data-href="{% url 'sales:freight_view' q.id %}">
-          <td><input type="checkbox" class="row-check form-check-input" value="{{ q.id }}"></td>
-          <td>{{ q.number }}</td>
-          <td>{{ q.date }}</td>
-          <td>{{ q.customer }}</td>
-          <td>{{ q.currency }}</td>
-          <td>{{ q.get_transport_mode_display }}</td>
-         <td>{{ q.get_service_option_display }}</td>
-          <td class="text-end">{{ q.cargos.count }}</td>
-          <td>
-            {% if q.status == "CLOSED" %}
-              <span class="badge text-bg-secondary">Closed</span>
-            {% elif q.status == "CONFIRMED" %}
-              <span class="badge text-bg-success">Confirmed</span>
-            {% elif q.status == "SENT" %}
-              <span class="badge text-bg-info">Sent</span>
-            {% elif q.status == "CANCELLED" %}
-              <span class="badge text-bg-light">Cancelled</span>
-            {% else %}
-              <span class="badge text-bg-primary ">Draft</span>
-            {% endif %}
-          </td>
-         
-        </tr>
-        {% empty %}
-        <tr><td colspan="11" class="text-center text-muted py-4">No quotations found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Services</label>
+       
+            <select name="service" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in service_choices %}
+                <option value="{{ val }}" {% if filters.service == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label class="form-label mb-0 small text-muted">Status</label>
+            <select name="status" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for val,label in status_choices %}
+                <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-1">
+            <input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control form-control-sm">
+          </div>
+          <div class="col-sm-1">
+            <input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control form-control-sm">
+          </div>
+          <div class="col-sm-2 ms-auto text-end">
+            <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-funnel"></i> Filter</button>
+            <a class="btn btn-light btn-sm" href="{% url 'sales:freight_list' %}">Reset</a>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- ===== Table ===== -->
+    <div class="card shadow-sm border-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="check-all"></th>
+              <th style="width:140px;">Number</th>
+              <th style="width:120px;">Date</th>
+              <th>Customer</th>
+              <th style="width:90px;">Mode</th>
+              <th style="width:180px;">Service</th>
+              <th class="text-end" style="width:120px;">Total</th>
+              <th style="width:110px;">Status</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in quotations %}
+            <tr data-href="{% url 'sales:freight_view' q.pk %}" style="cursor:pointer;">
+              <td><input type="checkbox" class="row-check" name="selected" value="{{ q.id }}" form="bulk-form"></td>
+              <td>{{ q.number }}</td>
+              <td>{{ q.date|date:"Y-m-d" }}</td>
+              <td>{{ q.customer.name|default:q.customer }}</td>
+              <td>{{ q.transport_mode }}</td>
+              <td>{{ q.get_service_option_display }}</td>
+              <td class="text-end"> {{ q.cargo_total|floatformat:2 }} </td>
+               <td>
+                <span class="badge bg-secondary">{{ q.status }}</span>
+              </td>
+             
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center text-muted py-4">Belum ada data.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer d-flex justify-content-between">
+        <div class="small text-muted">Total: {{ quotations|length }} item</div>
+        <a href="{% url 'sales:freight_new' %}" class="btn btn-light btn-sm">
+          <i class="bi bi-plus-lg"></i> Create New
+        </a>
+      </div>
+    </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-(function(){
-  const table = document.getElementById('fq-table');
-  if (!table) return;
+  (function(){
 
-  // checklist
-  const chkAll = document.getElementById('chk-all');
-  if (chkAll) {
-    chkAll.addEventListener('change', function(){
-      table.querySelectorAll('tbody .row-check').forEach(ch => ch.checked = chkAll.checked);
+ document.querySelectorAll("table tbody tr[data-href]").forEach(function(row){
+      row.addEventListener("click", function(e){
+        // kalau klik checkbox atau dalam <td> yang ada input, abaikan
+        if (e.target.closest("input[type=checkbox]") || e.target.closest("a, button")) {
+          return;
+        }
+        window.location = this.dataset.href;
+      });
+    });  // row click
+
+
+
+    const form = document.getElementById('bulk-form');
+    if (!form) return;
+
+    const checkAll  = document.getElementById('check-all');
+    const actionSel = document.getElementById('bulk-action');
+    const targetWrap= document.getElementById('target-status-wrap');
+    const idsField  = document.getElementById('bulk-ids');
+
+    // tampilkan dropdown target status saat pilih 'set_status'
+    actionSel.addEventListener('change', function(){
+      targetWrap.style.display = (this.value === 'set_status') ? 'flex' : 'none';
     });
-  }
-  table.querySelectorAll('tbody input.row-check').forEach(ch => {
-    ch.addEventListener('click', e => e.stopPropagation());
-    ch.addEventListener('mousedown', e => e.stopPropagation());
-  });
 
-  // row click
-  function clearActive(){
-    table.querySelectorAll('tbody tr.row-link').forEach(tr => tr.classList.remove('active'));
-  }
-  table.querySelectorAll('tbody tr.row-link').forEach(tr => {
-    tr.addEventListener('click', function(e){
-      if (e.target.closest('a, button, input, label, select, textarea')) return;
-      clearActive();
-      tr.classList.add('active');
-      const href = tr.dataset.href;
-      if (href) window.location = href;
-    });
-  });
-
-  // ---- mapping service per mode dari Django (JSON valid) ----
-  const serviceByMode = {{ service_by_mode_json|safe }};
-
-  // elemen filter
-  const form    = document.getElementById('filter-form');
-  const modeSel = document.getElementById('filter-mode') || document.querySelector('select[name="mode"]');
-  const servSel = document.getElementById('filter-service') || document.querySelector('select[name="service"]');
-
-  if (!modeSel || !servSel) return;
-
-  // Bangun ulang opsi Service berdasarkan mode
-  function rebuildServiceOptions(modeCode) {
-    // simpan value service saat ini
-    const prev = servSel.value;
-
-    // tentukan list (array of [code, label]) untuk mode yg dipilih
-    let list;
-    if (modeCode && serviceByMode[modeCode]) {
-      list = serviceByMode[modeCode];
-    } else {
-      // gabungkan semua unik: SEA, AIR, LAND
-      const seen = new Set();
-      list = [];
-      ["SEA","AIR","LAND"].forEach(k => {
-        (serviceByMode[k] || []).forEach(([code, label]) => {
-          if (!seen.has(code)) { seen.add(code); list.push([code,label]); }
-        });
+    // check all
+    if (checkAll) {
+      checkAll.addEventListener('change', function(){
+        document.querySelectorAll('input.row-check').forEach(cb => cb.checked = checkAll.checked);
       });
     }
 
-    // rebuild <select>
-    servSel.innerHTML = "";
-    // option default
-    const optAll = document.createElement("option");
-    optAll.value = ""; optAll.textContent = "All Services";
-    servSel.appendChild(optAll);
-
-    // append opsi sesuai list
-    list.forEach(([code,label]) => {
-      const op = document.createElement("option");
-      op.value = code; op.textContent = label;
-      servSel.appendChild(op);
+    // kumpulkan ID yang dicentang saat submit
+    form.addEventListener('submit', function(e){
+      const ids = Array.from(document.querySelectorAll('input.row-check:checked'))
+        .map(cb => cb.value);
+      idsField.value = ids.join(',');
+      if (!ids.length) {
+        e.preventDefault();
+        alert('Pilih minimal satu quotation.');
+      }
     });
+  })();
 
-    // restore jika masih valid, selain itu reset ke All
-    const valid = new Set(["", ...list.map(([v]) => v)]);
-    servSel.value = valid.has(prev) ? prev : "";
-  }
-
-  // Inisialisasi awal (sesuai mode dari server)
-  rebuildServiceOptions(modeSel.value);
-
-  // Event saat mode berubah → rebuild service
-  modeSel.addEventListener('change', function(){
-    rebuildServiceOptions(this.value);
-    // (opsional) auto-submit:
-    // if (form) form.submit();
-  });
-
-  // (opsional) auto-submit saat service berubah:
-  // servSel.addEventListener('change', function(){
-  //   if (form) form.submit();
-  // });
-
-  // Bootstrap tooltips (kalau butuh)
-  if (window.bootstrap) {
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-      try { new bootstrap.Tooltip(el); } catch(e){}
-    });
-  }
-
-
-  // bulk actions
-  const bulkForm = document.getElementById('bulk-form');
-  const idsInput = document.getElementById('bulk-ids');
-  const actInput = document.getElementById('bulk-action');
-
-  function selectedIds(){
-    const ids = [];
-    table.querySelectorAll('tbody .row-check:checked').forEach(ch => ids.push(ch.value));
-    return ids;
-  }
-
-  bulkForm.querySelectorAll('button[data-action]').forEach(btn => {
-    btn.addEventListener('click', function(){
-      const ids = selectedIds();
-      if (!ids.length) { alert('Pilih minimal satu quotation.'); return; }
-      if (this.dataset.action === 'delete' && !confirm('Hapus quotation terpilih?')) return;
-
-      idsInput.value = ids.join(',');
-      actInput.value = this.dataset.action;
-      bulkForm.submit();
-    });
-  });
-  
-})();
 </script>
 {% endblock %}
