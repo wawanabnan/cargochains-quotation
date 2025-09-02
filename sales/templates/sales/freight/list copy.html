@@ -135,7 +135,7 @@ tr:hover {background-color: coral;opacity: 1;}
           <td>{{ q.currency }}</td>
           <td>{{ q.get_transport_mode_display }}</td>
          <td>{{ q.get_service_option_display }}</td>
-          <td class="text-end">{{ q.cargos.count }}</td>
+          <td class="text-end">{{ q.total|floatformat:2 }}</td>
           <td>
             {% if q.status == "CLOSED" %}
               <span class="badge text-bg-secondary">Closed</span>

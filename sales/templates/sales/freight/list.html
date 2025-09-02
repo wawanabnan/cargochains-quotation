@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load l10n %}
 {% block content %}
 
 <!-- ===== Page Header ===== -->
@@ -138,10 +138,20 @@
               <td>{{ q.customer.name|default:q.customer }}</td>
               <td>{{ q.transport_mode }}</td>
               <td>{{ q.get_service_option_display }}</td>
-              <td class="text-end"> {{ q.cargo_total|floatformat:2 }} </td>
+             <td class="text-end">
+                {% localize on %} {{ q.cargo_total|floatformat:2  }}{% endlocalize %}
+
+             </td>
                <td>
-                <span class="badge bg-secondary">{{ q.status }}</span>
-              </td>
+
+                 {% if q.status == "CLOSED" %}
+                <span class="badge bg-success">{{ q.status }}</span>
+                 {% elif q.status == "CANCELLED" %}
+                <span class="badge bg-danger">Cancelled</span>
+                 {% else %}
+                  <span class="badge bg-secondary">{{ q.status }}</span>
+                {% endif %}
+                  </td>
              
             </tr>
             {% empty %}

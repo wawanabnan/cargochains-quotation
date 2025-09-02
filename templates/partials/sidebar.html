@@ -19,15 +19,39 @@
         </a>
       </li>
 
+      
     
       <!-- Sales -->
       <li class="nav-item">
         <a href="{% url 'sales:freight_list' %}"
            class="nav-link {% if '/sales/quotations' in request.path %}active{% endif %}">
           <i class="nav-icon fas fa-file-invoice-dollar"></i>
-          <p>Sales</p>
+          <p>Freight Quotation</p>
         </a>
       </li>
+       <li class="nav-item">
+        <a href="#"
+           class="nav-link {% if '/sales/quotations' in request.path %}active{% endif %}">
+          <i class="nav-icon fas fa-file-invoice-dollar"></i>
+          <p>Charters Ship Quotations</p>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="{% url 'sales:freight_order_list' %}"
+           class="nav-link {% if '/sales/orders/freight/' in request.path %}active{% endif %}">
+          <i class="nav-icon fas fa-file-invoice-dollar"></i>
+          <p>Freight Order Sales</p>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'sales:freight_list' %}"
+           class="nav-link {% if '/sales/quotations' in request.path %}active{% endif %}">
+          <i class="nav-icon fas fa-file-invoice-dollar"></i>
+          <p>Ship Charter Order</p>
+        </a>
+      </li>
+     
         <!-- Customers -->
       <li class="nav-item">
         <a href="#"

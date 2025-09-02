@@ -94,4 +94,5 @@ class Command(BaseCommand):
             q.save(update_fields=["status"])
             updated += 1
 
+        updated = will_update.update(status=target)
         self.stdout.write(self.style.SUCCESS(f"Selesai. Berhasil ubah {updated} quotation ke status {target}."))
